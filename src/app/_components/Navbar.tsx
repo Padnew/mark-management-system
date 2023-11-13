@@ -31,7 +31,7 @@ const navigationLinks = [
 
 export default function Navbar() {
   const router = useRouter();
-const links = navigationLinks.map((link, index) => (
+const links = navigationLinks.map((link) => (
   <NavbarLink
     {...link}
     key={link.label}
@@ -45,9 +45,9 @@ return (
     <div className='navbar-page-links'>
   {links}
   </div>
-  <Stack justify='center' gap={0}>
+  {/* <Stack justify='center' gap={0}> */}
     <NavbarLink icon={MdExitToApp} label="Change account" bottom/>
-  </Stack>
+  {/* </Stack> */}
 </nav>
   </MantineProvider>
 

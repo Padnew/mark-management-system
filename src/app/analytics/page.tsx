@@ -1,7 +1,6 @@
 import { Metadata } from 'next'
 import React from 'react'
-import PageHeader from '../components/PageHeader'
-import { FaAmazon } from 'react-icons/fa'
+import PageHeader from '../_components/PageHeader'
 
 export const metadata: Metadata = {
     title: 'Analytics',

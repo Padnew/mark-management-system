@@ -3,6 +3,7 @@
   padding: 0;
   margin: 0;
   font-family: 'Raleway Sans', sans-serif;
+  font-weight: 300;
 }
 
 html,
@@ -43,19 +44,19 @@ body {
   color: white;
 }
 .navbar-page-links {
-  height: max-content;
     display: flex;
-    flex-wrap: nowrap;
     flex-direction: column;
-    align-content: space-between;
     justify-content: space-between;
+    margin: auto;
 }
-.nav-button {
-  margin-top: 4rem;
-  background-color: #00375c;
+.nav-button-link {
+  margin: 4rem 0;
+  background-color: #002b5c;
 }
 .nav-button-bottom{
-  margin-top: auto;
+  bottom: 0;
+  position: relative;
+  margin-bottom: 1rem;
 }
 .nav-button:hover .nav-button-bottom:hover {
   background-color: #00375c;

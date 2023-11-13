@@ -1,5 +1,5 @@
 import React from 'react'
-import PageHeader from '../components/PageHeader'
+import PageHeader from '../_components/PageHeader'
 
 export default function page() {
   return (
