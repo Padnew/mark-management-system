@@ -3,11 +3,11 @@ import React, { useState } from 'react'
 import PageHeader from '../_components/PageHeader'
 import { Button, Container, Group, Select } from '@mantine/core'
 import { Dropzone, MIME_TYPES } from '@mantine/dropzone';
-import {FaCloudUploadAlt, FaCross, FaDownload} from 'react-icons/fa'
+import {FaCloudUploadAlt} from 'react-icons/fa'
 
 const classes = ['Software Testing @ CS2024', 'Functional Thinking @ CS2023', 'Computer Security @ CS2020', 'Mobile App Development @ SE2021']
 
-export default function page() {
+export default function Page() {
   const [uploadStatus, setUploadStatus] = useState(false);
   return (
     <>
