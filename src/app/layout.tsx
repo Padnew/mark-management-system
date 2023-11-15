@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import '@mantine/core/styles.css'
 import './globals.css'
 import Navbar from './_components/Navbar'
+import { MantineProvider } from '@mantine/core'
 
 export const metadata: Metadata = {
   title: {
@@ -19,10 +21,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body style={{ display: 'flex' }}>
+        <MantineProvider>
         <div className='main-page'>
                 <Navbar />
           {children}
         </div>
+        </MantineProvider>
       </body>
     </html>
   )
