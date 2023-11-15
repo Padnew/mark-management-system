@@ -12,9 +12,9 @@ export default function Page() {
   return (
     <>
     <PageHeader heading={'Upload'} subHeading={'Upload student marks'}/>
-    <Container size={700} mt={40}>
+    <Container size={700}>
     <Select data={classes} label='Please select a class from your taught classes' onSelect={() => {setUploadStatus(true)}}/>
-    <Container mt={25} ta="center" style={{border: '1px dashed black', borderRadius: '5px'}} p={20}>
+    <Container mt={25} ta="center" style={{border: '2px dashed black', borderRadius: '5px'}} p={20}>
       <Dropzone
         onDrop={() => {}}
         accept={[MIME_TYPES.csv]}
