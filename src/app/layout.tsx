@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import '@mantine/core/styles.css'
 import './globals.css'
 import Navbar from './_components/Navbar'
-import { MantineProvider } from '@mantine/core'
+import {MantineProvider } from '@mantine/core'
 
 export const metadata: Metadata = {
   title: {
@@ -19,11 +19,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body style={{ display: 'flex' }}>
+      <body>
         <MantineProvider>
-        <div className='main-page'>
-                <Navbar />
+        <div style={{marginLeft: '4.5rem', marginTop: '1rem'}} >
           {children}
+          <Navbar />
+
         </div>
         </MantineProvider>
       </body>

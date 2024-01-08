@@ -1,9 +1,9 @@
 * {
-  box-sizing: border-box;
   padding: 0;
   margin: 0;
   font-family: 'Raleway Sans', sans-serif;
   font-weight: 300;
+  z-index: 200;
 }
 
 html,
@@ -11,69 +11,8 @@ body {
   width: 100vw;
   color: black;
   background-color: #e8e8e8;
-  overflow-x: hidden;
 }
 .main-page {
   margin-left: 4.5rem;
   margin-top: 1rem;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  width: calc(100vw - 4.5rem);
-  margin-right: 1rem;
-}
-.page-header h1{
-  align-self: flex-start;
-  font-size: 3.5rem;
-    color: black;
-}
-  .page-header h2{
-    font-size: 2rem;
-    color: darkgray;
-  }
-  .page-header .mantine-Container-root {
-    margin: 0;
-  }
-  .page-header .content {
-    flex: 1;
-  }
-.page-header img {
-  align-self: flex-start;
-  right: 0;
-  margin-top: 0.5rem;
-}
-
-.navbar {
-  left: 0;
-  top: 0;
-  position: fixed; 
-  width: 4rem;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-color: #002b5c;
-  justify-content: space-evenly;
-  align-items: center;
-  color: white;
-}
-.navbar-page-links {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    margin: auto;
-}
-.nav-button-link {
-  margin: 2.5rem 0;
-  background-color: #002b5c;
-}
-.nav-button-bottom{
-  bottom: 0;
-  position: relative;
-  margin-bottom: 1rem;
-}
-.nav-button:hover .nav-button-bottom:hover {
-  background-color: #00375c;
 }
