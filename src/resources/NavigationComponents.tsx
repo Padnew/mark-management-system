@@ -19,7 +19,7 @@ export const NavigationLinks = [
  export function NavbarLink({ icon: Icon, label, onClick, bottom }: NavbarLinkProps) {
     return (
       <Tooltip label={label} position="right">
-      <div onClick={onClick} className={bottom ? 'nav-button-bottom' : 'nav-button-link'} data-cy={'nav-route-' + label.toLowerCase}>
+      <div onClick={onClick} style={{marginBottom:'4rem'}}>
         <Icon size={40}/>
       </div>
     </Tooltip>
