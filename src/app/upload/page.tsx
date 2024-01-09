@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react'
-import PageHeader from '../_components/PageHeader'
+import PageHeader from '../_components/shared/PageHeader'
 import { Button, Container, Group, Select } from '@mantine/core'
 import { Dropzone, MIME_TYPES } from '@mantine/dropzone';
 import {FaCloudUploadAlt} from 'react-icons/fa'

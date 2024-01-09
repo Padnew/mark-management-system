@@ -1,6 +1,6 @@
 "use client";
 import React, {useEffect, useState } from 'react';
-import PageHeader from '../_components/PageHeader';
+import PageHeader from '../_components/shared/PageHeader';
 import { Table } from '@mantine/core';
 
 async function getData(): Promise<Student[]> {

@@ -4,7 +4,7 @@ import { Button, Group, Modal, Paper} from '@mantine/core'
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { MdExitToApp } from 'react-icons/md'
-import { NavbarLink, NavigationLinks } from '@/resources/NavigationComponents';
+import { NavbarLink, NavigationLinks } from '@/app/_components/navigation/NavigationComponents';
 import { useDisclosure } from '@mantine/hooks';
 
 export default function Navbar() {

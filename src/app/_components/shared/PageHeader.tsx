@@ -1,6 +1,6 @@
 import {Group, Image, Stack } from '@mantine/core'
 import React from 'react'
-import image from 'public/MainLogo.png'
+import image from '@/resources/MainLogo.png'
 function PageHeader({ heading, subHeading }: any) {
   return (
     <>

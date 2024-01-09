@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import '@mantine/core/styles.css'
 import './globals.css'
-import Navbar from './_components/Navbar'
+import Navbar from './_components/navigation/Navbar'
 import {MantineProvider } from '@mantine/core'
 
 export const metadata: Metadata = {
