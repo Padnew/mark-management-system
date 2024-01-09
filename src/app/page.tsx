@@ -1,10 +1,10 @@
-import { Container } from '@mantine/core'
+"use client";
 import PageHeader from './_components/PageHeader'
 
 export default function Home() {
   return (
     <>
-    <PageHeader heading={'Dashboard'} subHeading={'Welcome back *User*'}/>
+    <PageHeader heading={'Dashboard'} subHeading={`Welcome back *user*`}/>
     <div style={{fontSize:'1.5rem', marginRight:'10rem'}}>
       <h2>Welcome to your new Mark Management System!</h2>
       <div>
