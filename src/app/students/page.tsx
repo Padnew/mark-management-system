@@ -4,7 +4,8 @@ import PageHeader from '../_components/shared/PageHeader';
 import { Table } from '@mantine/core';
 
 async function getData(): Promise<Student[]> {
-  const res = await fetch('http://localhost:20502/students')
+  
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/allstudents`)
   if (!res.ok) {
     throw new Error('Failed to fetch data')
   }
@@ -20,7 +21,7 @@ interface Student{
 
 export default function Page() {
   const [students, setStudents] = useState<Student[] | undefined>([]);
-
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -33,7 +34,7 @@ export default function Page() {
 
     fetchData();
   }, []);
-
+  
   const rows = students!.map((student) => (
     <Table.Tr key={student.reg_number}>
       <Table.Td>{student.reg_number}</Table.Td>
@@ -45,6 +46,7 @@ export default function Page() {
   return (
     <>
       <PageHeader heading='Students' subHeading='Raw student view' />
+      <div>
       <Table stickyHeader>
         <Table.Thead>
         <Table.Tr>
@@ -56,6 +58,7 @@ export default function Page() {
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>
       </Table>
+      </div>
     </>
   );
 }

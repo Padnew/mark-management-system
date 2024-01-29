@@ -8,6 +8,7 @@ function PageHeader({ heading, subHeading }: any) {
           display: 'flex',
           justifyContent: 'space-between',
           width: 'calc(100vw - 5.5rem)',
+          paddingLeft: '1rem',
           alignItems: "flex-start"
         }}>
         <Stack gap={0}>
