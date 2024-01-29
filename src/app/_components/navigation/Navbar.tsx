@@ -1,16 +1,24 @@
 "use client";
 
-import { Button, Group, Modal, Paper} from '@mantine/core'
-import React from 'react'
+import { Modal} from '@mantine/core'
+import React, { useContext } from 'react'
 import { useRouter } from 'next/navigation'
 import { MdExitToApp } from 'react-icons/md'
 import { NavbarLink, NavigationLinks } from '@/app/_components/navigation/NavigationComponents';
 import { useDisclosure } from '@mantine/hooks';
+import LogInModal from '@/app/_components/account/LogInModal';
+import UserContext from '@/app/context/UserContext';
+import { FaCogs } from 'react-icons/fa';
 
 export default function Navbar() {
   const router = useRouter();
   const [opened, { open, close }] = useDisclosure(false);
-  
+  const userContext = useContext(UserContext);
+
+  if (!userContext) {
+    return <div>Loading </div>; 
+  }
+  const { user } = userContext;
   const links = NavigationLinks.map((link) => (
     <NavbarLink
       {...link}
@@ -18,13 +26,11 @@ export default function Navbar() {
       onClick={() => router.push(link.route)}
     />
   ));
+  
   return (
     <>
     <Modal opened={opened} onClose={close} title="Switch Accounts" zIndex={1000} size='auto' >
-            <Group justify='space-between'>
-    <Button size='lg'>Switch to Admin</Button>
-    <Button size='lg'>Switch to Lecturer</Button>
-    </Group>
+            <LogInModal/>
       </Modal>
       <nav
         style={{
@@ -50,6 +56,10 @@ export default function Navbar() {
           }}
         >
           {links}
+          {user?.role == 1 ?
+        <NavbarLink icon={FaCogs} label="Admin area" onClick={() => router.push('/admin')}/>
+        : <></>
+        }
         </div>
         <NavbarLink
           icon={MdExitToApp}
