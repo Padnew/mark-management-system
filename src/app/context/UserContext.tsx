@@ -1,13 +1,6 @@
 "use client";
 import { createContext, Context } from 'react';
-
-interface User {
-    user_id: number;
-    first_name: string;
-    last_name: string;
-    email: string;
-    role: number;
-}
+import { User } from '../types';
 
 interface UserContextType {
   user: User | null;

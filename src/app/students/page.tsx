@@ -2,6 +2,7 @@
 import React, {useEffect, useState } from 'react';
 import PageHeader from '../_components/shared/PageHeader';
 import { Table } from '@mantine/core';
+import { Student } from '../types';
 
 async function getData(): Promise<Student[]> {
   
@@ -12,12 +13,6 @@ async function getData(): Promise<Student[]> {
   return res.json()
 }
 
-interface Student{
-  reg_number: string;
-  name: string;
-  degree_name: string;
-  degree_level: string;
-}
 
 export default function Page() {
   const [students, setStudents] = useState<Student[] | undefined>([]);
