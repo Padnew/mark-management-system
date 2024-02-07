@@ -42,20 +42,20 @@ app.get("/userauth", (req, res) => {
 });
 
 app.get("/allstudents", async (req, res) => {
-  connection.query("SELECT * from students", (err, res) => {
+  connection.query("SELECT * from students", (err, result) => {
     if (err) {
       return res.status(500).json({ error: "Internal Server Error" });
     }
-    return res.json(res);
+    return res.json(result);
   });
 });
 
 app.get("/results", async (req, res) => {
-  connection.query("SELECT * from results", (err, res) => {
+  connection.query("SELECT * from results", (err, result) => {
     if (err) {
       return res.status(500).json({ error: "Internal Server Error" });
     }
-    return res.json(res);
+    return res.json(result);
   });
 });
 
@@ -87,7 +87,7 @@ app.get("/classes/:classCode", async (req, res) => {
     if (err) {
       return res.status(500).json({ error: "Internal Server Error" });
     }
-    if (res.length === 0) {
+    if (result.length === 0) {
       return res.status(404).json({ error: "Class not found" });
     }
     return res.json(result);
@@ -108,14 +108,36 @@ app.get("/lecturers/:userId", async (req, res) => {
   });
 });
 
-app.post("/addlecturer", async (req, res) => {
-  const { first_name, last_name, email } = req.body;
+app.get("/results", async (req, res) => {
+  const query = "SELECT * from results";
+  connection.query(query, (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: "Internal Server Error" });
+    } else if (res.length == 0) {
+      return res.status(404).json({ error: "No results found" });
+    } else {
+      return res.json(result);
+    }
+  });
+});
 
-  if (!first_name || !last_name || !email) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Missing lecturer details" });
-  }
+// app.get("/results/:userId", async (req, res) => {
+//   const userId = res.query.userId;
+//   const query =
+//     "SELECT results.result_id, results.class_code, results.mark, results.reg_number, results.unique_code FROM results JOIN classes   ON results.class_code = classes.class_code  WHERE classes.user_id = ?";
+//   connection.query(query, [userId], (err, result) => {
+//     if (err) {
+//       return res.status(500).json({ error: "Internal Server Error" });
+//     } else if (res.length == 0) {
+//       return res.status(404).json({ error: "No results found" });
+//     } else {
+//       return res.json(result);
+//     }
+//   });
+// });
+
+app.post("/lecturer/create", async (req, res) => {
+  const { first_name, last_name, email } = req.body;
   connection.query(
     "SELECT * FROM users WHERE email = ?",
     [email],
@@ -140,11 +162,69 @@ app.post("/addlecturer", async (req, res) => {
                 .status(500)
                 .json({ success: false, message: "Failed to add Lecturer" });
             }
-            return res
-              .status(201)
-              .json({ success: true, message: "Lecturer added successfully" });
+            return res.status(201).json({
+              success: true,
+              message: "Lecturer created successfully",
+            });
           }
         );
+      }
+    }
+  );
+});
+
+app.post("/class/update", (req, res) => {
+  const { className, credits, lecturer, classCode, creditLevel } = req.body;
+  connection.query(
+    "UPDATE classes SET class_name = ?, credit_level = ?, credits = ?, user_id = ? WHERE class_code = ?",
+    [className, creditLevel, credits, lecturer, classCode],
+    (error, results) => {
+      if (error) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to update class",
+          error: error.message,
+        });
+      }
+      if (results.affectedRows === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Class not found",
+        });
+      } else {
+        return res.json({
+          success: true,
+          message: "Class updated successfully",
+        });
+      }
+    }
+  );
+});
+
+app.post("/classes/create", (req, res) => {
+  const { classCode, className, creditLevel, credits, locked, lecturer } =
+    req.body;
+  connection.query(
+    "INSERT INTO classes(class_code, class_name, credit_level, credits, locked, user_id) VALUES (?,?,?,?,?,?)",
+    [classCode, className, creditLevel, credits, false, lecturer],
+    (error, results) => {
+      if (error) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to update class",
+          error: error.message,
+        });
+      }
+      if (results.affectedRows === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Class not found",
+        });
+      } else {
+        return res.json({
+          success: true,
+          message: "Class updated successfully",
+        });
       }
     }
   );
