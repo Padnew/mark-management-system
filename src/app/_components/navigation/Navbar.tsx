@@ -1,6 +1,6 @@
 "use client";
 
-import { Modal} from '@mantine/core'
+import { Flex, Modal} from '@mantine/core'
 import React, { useContext } from 'react'
 import { useRouter } from 'next/navigation'
 import { MdExitToApp } from 'react-icons/md'
@@ -47,26 +47,25 @@ export default function Navbar() {
           color: 'white'
         }}
       >
-        <div
-          style={{
-            flexDirection: 'column',
-            margin: 'auto',
-            justifyContent: 'space-between',
-            display:'flex'
-          }}
-        >
-          {links}
-          {user?.role == 1 ?
-        <NavbarLink icon={FaCogs} label="Admin area" onClick={() => router.push('/admin')}/>
-        : <></>
-        }
-        </div>
+        <Flex direction='column' m='auto' justify='space-between' display='flex'>
+          {user && links}
+          {user?.role == 2 && <NavbarLink icon={FaCogs} label="Admin area" onClick={() => router.push('/admin')}/> }
+        </Flex>
+        {user == null ? 
         <NavbarLink
           icon={MdExitToApp}
-          label="Change account"
+          label="Log In"
           bottom
           onClick={open}
         />
+        :
+        <NavbarLink
+        icon={MdExitToApp}
+        label="Log Out"
+        bottom
+        onClick={open}
+      />
+}
       </nav>
     </>
   );

@@ -8,12 +8,12 @@ export default function Home() {
   const userContext = useContext(UserContext);
 
   if (!userContext) {
-    return <div>Loading </div>; 
+    return <div>Loading</div>; 
   }
   const { user } = userContext;
   return (
     <>
-    <PageHeader heading={'Dashboard'} subHeading={`Welcome ${user != null ? user?.first_name : 'User'}`}/>
+    <PageHeader heading={'Dashboard'} subHeading={user != null &&  `Welcome back, ${user?.first_name}!`}/>
     <div style={{fontSize:'1.5rem', marginRight:'10rem', paddingLeft:'1rem'}}>
       <h2>Welcome to your new Mark Management System!</h2>
       <div>
