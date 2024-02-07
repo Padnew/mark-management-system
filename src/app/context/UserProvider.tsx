@@ -15,11 +15,9 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, password }),
         });
-        console.log(response)
 
         if (response.ok) {
             const data = await response.json();
-            console.log(data)
             setUser(data.user);
         } else {
             console.error("Login failed");
