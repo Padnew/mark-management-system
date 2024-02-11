@@ -2,28 +2,24 @@ import React, { useState } from 'react'
 import { Button, Container, Group, Select } from '@mantine/core'
 import { Dropzone, MIME_TYPES } from '@mantine/dropzone';
 import {FaCloudUploadAlt} from 'react-icons/fa'
+import { ClassType } from '@/app/types';
 
-
-interface Class {
-  class_code: string;
-  class_name: string;
-  credit_level: number;
-  credits: number;
-  locked: boolean;
-  user_id: number;
-}
 
 interface Props{
-  classes : Class[]
+  classes : ClassType[]
 }
 
-function DropzoneComponent() {
+function DropzoneComponent({classes}: Props) {
   const [uploadStatus, setUploadStatus] = useState(false);
-  const classes = ['Software Testing @ CS2024', 'Functional Thinking @ CS2023', 'Computer Security @ CS2020', 'Mobile App Development @ SE2021']
 
   return (
     <Container size={800}> 
-    <Select data={classes} label='Please select a class from your taught classes' onSelect={() => {setUploadStatus(true)}}/>
+    <Select data={classes.map((classType) => ({
+          value: classType.class_code.toString(),
+          label: `${classType.class_name}`,
+        }))}
+    label='Please select a class from your taught classes' 
+    onSelect={() => {setUploadStatus(true)}}/>
     <Container mt={25} ta="center" style={{border: '2px dashed black', borderRadius: '5px'}} p={80} fz={30}>
       <Dropzone
         onDrop={() => {}}

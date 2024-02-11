@@ -94,6 +94,24 @@ app.get("/classes/:classCode", async (req, res) => {
   });
 });
 
+app.get("/classesByUser/:userId", async (req, res) => {
+  const { userId } = req.params;
+  console.log(userId);
+  connection.query(
+    "SELECT * from classes WHERE user_id = ?",
+    [userId],
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+      if (result.length === 0) {
+        return res.status(200).json({ error: "No classes found" });
+      }
+      return res.json(result);
+    }
+  );
+});
+
 app.get("/lecturers/:userId", async (req, res) => {
   const userId = req.params.userId;
   const query = "SELECT * from users WHERE user_id = ?";
