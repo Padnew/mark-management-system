@@ -7,6 +7,7 @@ app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());
 
+//USER ENDPOINTS
 app.post("/login", (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
     if (err) {
@@ -41,24 +42,7 @@ app.get("/userauth", (req, res) => {
   }
 });
 
-app.get("/allstudents", async (req, res) => {
-  connection.query("SELECT * from students", (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-    return res.json(result);
-  });
-});
-
-app.get("/results", async (req, res) => {
-  connection.query("SELECT * from results", (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-    return res.json(result);
-  });
-});
-
+// LECTURER ENDPOINTS
 app.get("/lecturers", async (req, res) => {
   connection.query(
     "SELECT * from users where role = 1",
@@ -71,6 +55,120 @@ app.get("/lecturers", async (req, res) => {
   );
 });
 
+app.get("/lecturers/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  const query = "SELECT * from users WHERE user_id = ?";
+  connection.query(query, [userId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    if (res.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    return res.json(result);
+  });
+});
+
+app.post("/lecturer/create", async (req, res) => {
+  const { first_name, last_name, email } = req.body;
+  connection.query(
+    "SELECT * FROM users WHERE email = ?",
+    [email],
+    (err, result) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ success: false, message: "Error checking email" });
+      }
+
+      if (result.length > 0) {
+        return res
+          .status(500)
+          .json({ success: false, message: "Email already in use" });
+      } else {
+        connection.query(
+          "INSERT INTO users (first_name, last_name, email, role) VALUES (?, ?, ?, 1)",
+          [first_name, last_name, email],
+          (insertErr, insertResult) => {
+            if (insertErr) {
+              return res
+                .status(500)
+                .json({ success: false, message: "Failed to add Lecturer" });
+            }
+            return res.status(201).json({
+              success: true,
+              message: "Lecturer created successfully",
+            });
+          }
+        );
+      }
+    }
+  );
+});
+
+// STUDENT ENDPOINTS
+app.get("/students/all", async (req, res) => {
+  connection.query("SELECT * from students", (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    return res.json(result);
+  });
+});
+
+app.get("/students/:userId", async (req, res) => {
+  const { userId } = req.params;
+  connection.query(
+    "SELECT s.* FROM students s JOIN results r ON s.reg_number = r.reg_number JOIN classes c ON r.class_code = c.class_code WHERE c.user_id = ?",
+    [userId],
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+      return res.json(result);
+    }
+  );
+});
+
+// RESULTS ENDPOINTS
+app.get("/results", async (req, res) => {
+  connection.query("SELECT * from results", (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    return res.json(result);
+  });
+});
+app.get("/results", async (req, res) => {
+  const query = "SELECT * from results";
+  connection.query(query, (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: "Internal Server Error" });
+    } else if (res.length == 0) {
+      return res.status(404).json({ error: "No results found" });
+    } else {
+      return res.json(result);
+    }
+  });
+});
+
+app.get("/results/:userId", async (req, res) => {
+  const userId = res.params.userId;
+  console.log(userId);
+  const query =
+    "SELECT results.result_id, results.class_code, results.mark, results.reg_number, results.unique_code FROM results JOIN classes ON results.class_code = classes.class_code  WHERE classes.user_id = ?";
+  connection.query(query, [userId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: "Internal Server Error" });
+    } else if (res.length == 0) {
+      return res.status(404).json({ error: "No results found" });
+    } else {
+      return res.json(result);
+    }
+  });
+});
+
+// CLASSES ENDPOINTS
 app.get("/classes", async (req, res) => {
   connection.query("SELECT * from classes", (err, result) => {
     if (err) {
@@ -108,85 +206,6 @@ app.get("/classesByUser/:userId", async (req, res) => {
         return res.status(200).json({ error: "No classes found" });
       }
       return res.json(result);
-    }
-  );
-});
-
-app.get("/lecturers/:userId", async (req, res) => {
-  const userId = req.params.userId;
-  const query = "SELECT * from users WHERE user_id = ?";
-  connection.query(query, [userId], (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-    if (res.length === 0) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    return res.json(result);
-  });
-});
-
-app.get("/results", async (req, res) => {
-  const query = "SELECT * from results";
-  connection.query(query, (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: "Internal Server Error" });
-    } else if (res.length == 0) {
-      return res.status(404).json({ error: "No results found" });
-    } else {
-      return res.json(result);
-    }
-  });
-});
-
-// app.get("/results/:userId", async (req, res) => {
-//   const userId = res.query.userId;
-//   const query =
-//     "SELECT results.result_id, results.class_code, results.mark, results.reg_number, results.unique_code FROM results JOIN classes   ON results.class_code = classes.class_code  WHERE classes.user_id = ?";
-//   connection.query(query, [userId], (err, result) => {
-//     if (err) {
-//       return res.status(500).json({ error: "Internal Server Error" });
-//     } else if (res.length == 0) {
-//       return res.status(404).json({ error: "No results found" });
-//     } else {
-//       return res.json(result);
-//     }
-//   });
-// });
-
-app.post("/lecturer/create", async (req, res) => {
-  const { first_name, last_name, email } = req.body;
-  connection.query(
-    "SELECT * FROM users WHERE email = ?",
-    [email],
-    (err, result) => {
-      if (err) {
-        return res
-          .status(500)
-          .json({ success: false, message: "Error checking email" });
-      }
-
-      if (result.length > 0) {
-        return res
-          .status(500)
-          .json({ success: false, message: "Email already in use" });
-      } else {
-        connection.query(
-          "INSERT INTO users (first_name, last_name, email, role) VALUES (?, ?, ?, 1)",
-          [first_name, last_name, email],
-          (insertErr, insertResult) => {
-            if (insertErr) {
-              return res
-                .status(500)
-                .json({ success: false, message: "Failed to add Lecturer" });
-            }
-            return res.status(201).json({
-              success: true,
-              message: "Lecturer created successfully",
-            });
-          }
-        );
-      }
     }
   );
 });
