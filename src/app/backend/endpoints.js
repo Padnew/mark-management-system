@@ -87,7 +87,7 @@ app.post("/lecturer/create", async (req, res) => {
           .json({ success: false, message: "Email already in use" });
       } else {
         connection.query(
-          "INSERT INTO users (first_name, last_name, email, role) VALUES (?, ?, ?, 1)",
+          "INSERT INTO users (first_name, last_name, email, role) VALUES (?, ?, ?, 2)",
           [first_name, last_name, email],
           (insertErr, insertResult) => {
             if (insertErr) {

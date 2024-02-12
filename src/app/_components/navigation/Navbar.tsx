@@ -49,7 +49,7 @@ export default function Navbar() {
       >
         <Flex direction='column' m='auto' justify='space-between' display='flex'>
           {user && links}
-          {user?.role == 2 && <NavbarLink icon={FaCogs} label="Admin area" onClick={() => router.push('/admin')}/> }
+          {user?.role == 1 && <NavbarLink icon={FaCogs} label="Admin area" onClick={() => router.push('/admin')}/> }
         </Flex>
         {user == null ? 
         <NavbarLink
