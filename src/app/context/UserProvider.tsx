@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, ReactNode } from 'react';
+import React, { useState, ReactNode, useEffect } from 'react';
 import UserContext from './UserContext';
 
 interface UserProviderProps {
@@ -8,9 +8,17 @@ interface UserProviderProps {
 
 const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const [user, setUser] = useState<any>(null);
+    const [isLoadingUser, setIsLoadingUser] = useState(true);
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+        setIsLoadingUser(false);
+    }, []);
 
     const login = async (username: string, password: string) => {
-        const response = await fetch("http://localhost:20502/login", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, password }),
@@ -19,6 +27,7 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         if (response.ok) {
             const data = await response.json();
             setUser(data.user);
+            localStorage.setItem('user', JSON.stringify(data.user));
         } else {
             console.error("Login failed");
         }
@@ -26,10 +35,11 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
     const logout = () => {
         setUser(null);
+        localStorage.removeItem('user');
     };
 
     return (
-        <UserContext.Provider value={{ user, login, logout }}>
+        <UserContext.Provider value={{ user, login, logout, isLoadingUser }}>
             {children}
         </UserContext.Provider>
     );

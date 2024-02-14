@@ -6,6 +6,7 @@ interface UserContextType {
   user: User | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
+  isLoadingUser: boolean
 }
 
 const UserContext: Context<UserContextType | null> = createContext<UserContextType | null>(null);
