@@ -72,7 +72,7 @@ export default function Page() {
 
   
   const classRows = classes!.map((classType)=>(
-    <Table.Tr key={classType.class_code}>
+    <Table.Tr key={classType.class_code}  bg={classType.locked ? 'red' : ''}>
       <Table.Td>{classType.class_code}</Table.Td>
       <Table.Td>{classType.class_name}</Table.Td>
       <Table.Td>{classType.credit_level}</Table.Td>
