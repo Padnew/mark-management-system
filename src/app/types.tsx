@@ -33,7 +33,17 @@ export interface User{
 export interface Result{
     result_id: number;
     class_code: string;
-    reg_number: string;
     mark: number;
+    reg_number: string;
     unique_code: string;
 }
+
+export interface CSVRow {
+    ClassCode: string;
+    RegistrationNumber: string;
+    Result: string;
+    Student: string;
+    DegreeLevel: string;
+    CourseName: string;
+    UniqueCode: string;
+  }

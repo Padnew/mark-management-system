@@ -1,9 +1,16 @@
 import React, { useState } from 'react'
-import { Button, Container, Group, Select } from '@mantine/core'
+import { Button, Container, Group, Select, Text } from '@mantine/core'
 import { Dropzone, MIME_TYPES } from '@mantine/dropzone';
 import {FaCloudUploadAlt} from 'react-icons/fa'
-import { ClassType } from '@/app/types';
+import { CSVRow, ClassType, Student } from '@/app/types';
+import Papa from 'papaparse';
 
+interface CSVResult{
+  class_code: string;
+  reg_number: string;
+  mark: number;
+  unique_code: string;
+}
 
 interface Props{
   classes : ClassType[]
@@ -11,6 +18,69 @@ interface Props{
 
 function DropzoneComponent({classes}: Props) {
   const [uploadStatus, setUploadStatus] = useState(false);
+  const [validationError, setValidationError] = useState('');
+
+   const handleFileUpload = (files: File[]) => {
+    const file = files[0];
+    Papa.parse<CSVRow>(file, {
+      header: true,
+      skipEmptyLines: 'greedy',
+      complete: async (result) => {
+        const students: Student[] = [];
+        const results: CSVResult[] = [];
+  
+        result.data.forEach((row: CSVRow) => {
+          const student: Student = {
+            reg_number: row.RegistrationNumber,
+            name: row.Student,
+            degree_name: row.CourseName,
+            degree_level: row.DegreeLevel,
+          };
+  
+          const result: CSVResult = {
+            class_code: row.ClassCode,
+            reg_number: row.RegistrationNumber,
+            mark: parseInt(row.Result),
+            unique_code: row.UniqueCode,
+          };
+  
+          students.push(student);
+          results.push(result);
+        });
+        try {
+          await submitData(students, `${process.env.NEXT_PUBLIC_API_URL}/students/create`);
+          await submitData(results, `${process.env.NEXT_PUBLIC_API_URL}/results/create`);
+          console.log("Data submitted successfully.");
+        } catch (error) {
+          console.error('Error submitting data:', error);
+        }
+      },
+      error: (error) => console.error('Error parsing CSV:', error.message),
+    });
+  }
+
+  const validateRow = (row: CSVRow): boolean => {
+    return Object.values(row).every(value => value.trim() !== '');
+  };
+  
+  const submitData = async (data: Student[] | CSVResult[], endpoint: string) => {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to submit data to ${endpoint}`);
+      }
+      console.log(`Data submitted successfully to ${endpoint}`);
+    } catch (error) {
+      console.error('Error submitting data:', error);
+    }
+  };
 
   return (
     <Container size={800}> 
@@ -22,8 +92,8 @@ function DropzoneComponent({classes}: Props) {
     onSelect={() => {setUploadStatus(true)}}/>
     <Container mt={25} ta="center" style={{border: '2px dashed black', borderRadius: '5px'}} p={80} fz={30}>
       <Dropzone
-        onDrop={() => {}}
-        accept={[MIME_TYPES.csv]}
+          onDrop={handleFileUpload}
+          accept={[MIME_TYPES.csv]}
       >
         <div style={{ pointerEvents: 'none' }}>
           <Group justify="center">
@@ -31,14 +101,15 @@ function DropzoneComponent({classes}: Props) {
               <FaCloudUploadAlt size={50} />
             </Dropzone.Idle>
           </Group>
-          <p>
+          <Text>
             <Dropzone.Idle>Upload CSV</Dropzone.Idle>
-          </p>
-          <p style={{color:"red"}}>
+          </Text>
+          <Text c='red'>
             Please ensure CSV is in the same format provided or it will be rejected!
-          </p>
+          </Text>
         </div>
       </Dropzone>
+      {validationError && <Text c='red'>{validationError}</Text>}
       <Button size="md" radius="xl" justify='center' mt={20}>
         Select files
       </Button>

@@ -45,7 +45,7 @@ app.get("/userauth", (req, res) => {
 // LECTURER ENDPOINTS
 app.get("/lecturers", async (req, res) => {
   connection.query(
-    "SELECT * from users where role = 1",
+    "SELECT * from users where role = 2",
     (err, results, fields) => {
       if (err) {
         return res.status(500).json({ error: "Internal Server Error" });
@@ -130,6 +130,34 @@ app.get("/students/:userId", async (req, res) => {
   );
 });
 
+app.post("/students/create", (req, res) => {
+  const students = req.body;
+
+  const sql =
+    "INSERT INTO students(reg_number, name, degree_name, degree_level) VALUES ?";
+  const values = students.map((student) => [
+    student.reg_number,
+    student.name,
+    student.degree_name,
+    student.degree_level,
+  ]);
+
+  connection.query(sql, [values], (error, results) => {
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to insert student",
+        error: error.message,
+      });
+    } else {
+      return res.json({
+        success: true,
+        message: "Student inserted successfully",
+      });
+    }
+  });
+});
+
 // RESULTS ENDPOINTS
 app.get("/results", async (req, res) => {
   connection.query("SELECT * from results", (err, result) => {
@@ -153,8 +181,7 @@ app.get("/results", async (req, res) => {
 });
 
 app.get("/results/:userId", async (req, res) => {
-  const userId = res.params.userId;
-  console.log(userId);
+  const { userId } = req.params;
   const query =
     "SELECT results.result_id, results.class_code, results.mark, results.reg_number, results.unique_code FROM results JOIN classes ON results.class_code = classes.class_code  WHERE classes.user_id = ?";
   connection.query(query, [userId], (err, result) => {
@@ -164,6 +191,32 @@ app.get("/results/:userId", async (req, res) => {
       return res.status(404).json({ error: "No results found" });
     } else {
       return res.json(result);
+    }
+  });
+});
+
+app.post("/results/create", async (req, res) => {
+  const results = req.body;
+  const query =
+    "INSERT INTO results(class_code, reg_number, mark, unique_code) VALUES ?";
+  const values = results.map((result) => [
+    result.class_code,
+    result.reg_number,
+    result.mark,
+    result.unique_code,
+  ]);
+  connection.query(query, [values], (err, result) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to insert result",
+        error: error.message,
+      });
+    } else {
+      return res.json({
+        success: true,
+        message: "Results inserted successfully",
+      });
     }
   });
 });
@@ -194,7 +247,6 @@ app.get("/classes/:classCode", async (req, res) => {
 
 app.get("/classesByUser/:userId", async (req, res) => {
   const { userId } = req.params;
-  console.log(userId);
   connection.query(
     "SELECT * from classes WHERE user_id = ?",
     [userId],
@@ -210,7 +262,7 @@ app.get("/classesByUser/:userId", async (req, res) => {
   );
 });
 
-app.post("/class/update", (req, res) => {
+app.post("/classes/update", (req, res) => {
   const { className, credits, lecturer, classCode, creditLevel } = req.body;
   connection.query(
     "UPDATE classes SET class_name = ?, credit_level = ?, credits = ?, user_id = ? WHERE class_code = ?",
@@ -248,23 +300,32 @@ app.post("/classes/create", (req, res) => {
       if (error) {
         return res.status(500).json({
           success: false,
-          message: "Failed to update class",
+          message: "Failed to create class",
           error: error.message,
-        });
-      }
-      if (results.affectedRows === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "Class not found",
         });
       } else {
         return res.json({
           success: true,
-          message: "Class updated successfully",
+          message: "Class created successfully",
         });
       }
     }
   );
+});
+
+app.post("/classes/locked", (req, res) => {
+  const { classCode, lockedNumber } = req.body;
+  const query = "UPDATE classes SET locked = ? WHERE class_code = ?";
+  connection.query(query, [lockedNumber, classCode], (error, results) => {
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update class",
+      });
+    } else {
+      return res.json({ success: true, message: "Updated class successfully" });
+    }
+  });
 });
 
 app.use((err, req, res, next) => {
