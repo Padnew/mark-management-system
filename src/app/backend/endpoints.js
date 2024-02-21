@@ -158,18 +158,29 @@ app.post("/students/create", (req, res) => {
   });
 });
 
+app.delete("students/clear", (res, req) => {
+  connection.query(
+    "DELETE FROM students WHERE reg_number NOT IN (SELECT reg_number FROM Results)",
+    (error, results) => {
+      if (error) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to remove students",
+          error: error.message,
+        });
+      } else {
+        return res.json({
+          success: true,
+          message: "Cleared excess students",
+        });
+      }
+    }
+  );
+});
+
 // RESULTS ENDPOINTS
 app.get("/results", async (req, res) => {
   connection.query("SELECT * from results", (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-    return res.json(result);
-  });
-});
-app.get("/results", async (req, res) => {
-  const query = "SELECT * from results";
-  connection.query(query, (err, result) => {
     if (err) {
       return res.status(500).json({ error: "Internal Server Error" });
     } else if (res.length == 0) {
@@ -178,6 +189,23 @@ app.get("/results", async (req, res) => {
       return res.json(result);
     }
   });
+});
+
+app.post("/results/detailed", async (req, res) => {
+  const { regNumber, year } = req.body;
+  connection.query(
+    "SELECT * from results WHERE reg_number = ? AND Year = ?",
+    [regNumber, year],
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: "Internal Server Error" });
+      } else if (res.length == 0) {
+        return res.status(404).json({ error: "No results found" });
+      } else {
+        return res.json(result);
+      }
+    }
+  );
 });
 
 app.get("/results/:userId", async (req, res) => {
@@ -198,12 +226,13 @@ app.get("/results/:userId", async (req, res) => {
 app.post("/results/create", async (req, res) => {
   const results = req.body;
   const query =
-    "INSERT INTO results(class_code, reg_number, mark, unique_code) VALUES ?";
+    "INSERT INTO results(class_code, reg_number, mark, unique_code, year) VALUES ?";
   const values = results.map((result) => [
     result.class_code,
     result.reg_number,
     result.mark,
     result.unique_code,
+    result.year,
   ]);
   connection.query(query, [values], (err, result) => {
     if (err) {

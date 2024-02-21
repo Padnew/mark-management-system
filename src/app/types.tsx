@@ -36,6 +36,7 @@ export interface Result{
     mark: number;
     reg_number: string;
     unique_code: string;
+    year: string;
 }
 
 export interface CSVRow {

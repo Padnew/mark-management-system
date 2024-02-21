@@ -1,13 +1,15 @@
 "use client";
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import PageHeader from '../_components/shared/PageHeader'
 import { Button, Grid, GridCol, Group, LoadingOverlay, Modal, Table, Title} from '@mantine/core'
-import { FaEye, FaPlus } from 'react-icons/fa';
+import { FaEye, FaPlus, FaTrash } from 'react-icons/fa';
 import { EditButton } from '../_components/shared/EditButton';
 import { ClassType, Lecturer, User } from '../types';
 import EditClassModal from '../_components/admin/EditClassModal';
 import CreateClassModal from '../_components/admin/CreateClassModal';
 import CreateLecturerModal from '../_components/admin/CreateLecturerModal';
+import UserContext from '../context/UserContext';
+import { useRouter } from 'next/navigation';
 
 export default function Page() {
   const [classes, setClasses] = useState<ClassType[] | undefined>([]);
@@ -17,7 +19,9 @@ export default function Page() {
   const [createModalOpened, setCreateModalOpened] = useState(false);
   const [lecturerModalOpened, setLecturerModalOpened] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassType | null>(null);
-  
+  const userContext = useContext(UserContext);
+  const router = useRouter();
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -29,6 +33,17 @@ export default function Page() {
       setLoading(false);
     }
   };
+
+  if (userContext && !userContext.isLoadingUser && userContext.user?.role == 2) {
+    router.push('/404')
+  }
+
+  const clearExcessStudents = async () => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/clear`)
+    if (!res.ok) {
+      throw new Error('Failed to clear excess students');
+    }
+  }
 
   const fetchClasses = async () => {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes`);
@@ -100,6 +115,7 @@ export default function Page() {
       <Group py={10} pl={5} align='flex-end'>
         <Button leftSection={<FaPlus/>} variant='outline' color='green' size='md' onClick={() => setCreateModalOpened(true)}>Add new class</Button>
         <Button leftSection={<FaPlus/>} variant='outline' color='green' size='md' onClick={()=> setLecturerModalOpened(true)}>Add new lecturer</Button>
+        <Button leftSection={<FaTrash/>} variant='outline' color='red' size='md' onClick={clearExcessStudents}>Clear excess students</Button>
       </Group>
       <hr/>
     <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
