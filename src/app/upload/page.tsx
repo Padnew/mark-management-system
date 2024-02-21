@@ -4,28 +4,36 @@ import PageHeader from '../_components/shared/PageHeader'
 import DropzoneComponent from '../_components/upload/DropzoneComponent';
 import UserContext from '../context/UserContext';
 import { ClassType } from '../types';
+import { useRouter } from 'next/navigation';
+
+async function getData(userId: number, role: number): Promise<ClassType[]> {
+  const res = role == 2 ? await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classesByUser/${userId}`) : 
+                          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes`)
+  if (!res.ok) {
+    throw new Error('Failed to fetch data')
+  }
+  return res.json()
+}
 
 export default function Page() {
   const userContext = useContext(UserContext);
   const [classes, setClasses] = useState<ClassType[]>([])
+  const router = useRouter()
   useEffect(() => {
     const fetchClasses = async () => {
-      const userId = user?.user_id
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classesByUser/${userId}`)
-      if (!res.ok) {
-        throw new Error('Failed to fetch classes');
-      }
-      const data = await res.json();
+      if (userContext?.user) {
+      const data = await getData(userContext.user.user_id, userContext.user.role);
       setClasses(data)
     };
-    fetchClasses()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  if (!userContext) {
-    return <div>Loading</div>; 
   }
-  const { user } = userContext;
+    if (userContext && !userContext.isLoadingUser) {
+      fetchClasses();
+    }
+  }, [userContext, userContext?.user, userContext?.isLoadingUser]);
+
+  if (!userContext?.isLoadingUser && !userContext?.user) {
+    router.push('/404')
+  }
 
   return (
     <>

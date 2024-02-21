@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Button, Container, Group, Select, Text } from '@mantine/core'
 import { Dropzone, MIME_TYPES } from '@mantine/dropzone';
 import {FaCloudUploadAlt} from 'react-icons/fa'
@@ -10,6 +10,7 @@ interface CSVResult{
   reg_number: string;
   mark: number;
   unique_code: string;
+  year: string;
 }
 
 interface Props{
@@ -19,6 +20,7 @@ interface Props{
 function DropzoneComponent({classes}: Props) {
   const [uploadStatus, setUploadStatus] = useState(false);
   const [validationError, setValidationError] = useState('');
+  const openRef = useRef<() => void>(null);
 
    const handleFileUpload = (files: File[]) => {
     const file = files[0];
@@ -42,6 +44,7 @@ function DropzoneComponent({classes}: Props) {
             reg_number: row.RegistrationNumber,
             mark: parseInt(row.Result),
             unique_code: row.UniqueCode,
+            year: new Date().getFullYear().toString()
           };
   
           students.push(student);
@@ -58,10 +61,6 @@ function DropzoneComponent({classes}: Props) {
       error: (error) => console.error('Error parsing CSV:', error.message),
     });
   }
-
-  const validateRow = (row: CSVRow): boolean => {
-    return Object.values(row).every(value => value.trim() !== '');
-  };
   
   const submitData = async (data: Student[] | CSVResult[], endpoint: string) => {
     try {
@@ -76,7 +75,7 @@ function DropzoneComponent({classes}: Props) {
       if (!response.ok) {
         throw new Error(`Failed to submit data to ${endpoint}`);
       }
-      console.log(`Data submitted successfully to ${endpoint}`);
+      setUploadStatus(true)
     } catch (error) {
       console.error('Error submitting data:', error);
     }
@@ -86,12 +85,12 @@ function DropzoneComponent({classes}: Props) {
     <Container size={800}> 
     <Select data={classes.map((classType) => ({
           value: classType.class_code.toString(),
-          label: `${classType.class_name}`,
+          label: `${classType.class_code}: ${classType.class_name}`,
         }))}
-    label='Please select a class from your taught classes' 
-    onSelect={() => {setUploadStatus(true)}}/>
+    label='Please select a class from your taught classes' />
     <Container mt={25} ta="center" style={{border: '2px dashed black', borderRadius: '5px'}} p={80} fz={30}>
       <Dropzone
+        openRef={openRef}
           onDrop={handleFileUpload}
           accept={[MIME_TYPES.csv]}
       >
@@ -100,6 +99,9 @@ function DropzoneComponent({classes}: Props) {
             <Dropzone.Idle>
               <FaCloudUploadAlt size={50} />
             </Dropzone.Idle>
+            <Dropzone.Accept>
+              <FaCloudUploadAlt size={50} />
+            </Dropzone.Accept>
           </Group>
           <Text>
             <Dropzone.Idle>Upload CSV</Dropzone.Idle>
@@ -110,7 +112,7 @@ function DropzoneComponent({classes}: Props) {
         </div>
       </Dropzone>
       {validationError && <Text c='red'>{validationError}</Text>}
-      <Button size="md" radius="xl" justify='center' mt={20}>
+      <Button onClick={() => openRef.current?.()} size="md" radius="xl" justify='center' mt={20}>
         Select files
       </Button>
     </Container>
