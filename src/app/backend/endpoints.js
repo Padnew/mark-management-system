@@ -250,6 +250,42 @@ app.post("/results/create", async (req, res) => {
   });
 });
 
+app.post("/results/queried", async (req, res) => {
+  const { class: classFilter, course, degreeLevel, year } = req.body;
+
+  let query = `
+    SELECT r.result_id, r.class_code, r.reg_number, r.mark, r.unique_code, r.year, s.degree_name, s.degree_level
+    FROM results r
+    INNER JOIN students s ON r.reg_number = s.reg_number
+  `;
+  const conditions = [];
+
+  if (classFilter) {
+    conditions.push(`r.class_code = '${classFilter}'`);
+  }
+  if (year) {
+    conditions.push(`r.year = '${year}'`);
+  }
+  if (degreeLevel) {
+    conditions.push(`s.degree_level = '${degreeLevel}'`);
+  }
+  if (course) {
+    conditions.push(`s.degree_name = '${course}'`);
+  }
+  if (conditions.length > 0) {
+    query += " WHERE " + conditions.join(" AND ");
+  }
+  connection.query(query, (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: "Internal Server Error" });
+    } else if (result.length == 0) {
+      return res.status(404).json({ message: "No results found" });
+    } else {
+      return res.json(result);
+    }
+  });
+});
+
 // CLASSES ENDPOINTS
 app.get("/classes", async (req, res) => {
   connection.query("SELECT * from classes", (err, result) => {
