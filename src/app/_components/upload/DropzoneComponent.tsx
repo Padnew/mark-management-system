@@ -1,8 +1,8 @@
 import React, { useRef, useState } from "react";
 import { Button, Container, Group, Select, Text } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
-import { FaCloudUploadAlt } from "react-icons/fa";
-import { CSVRow, ClassType, Student } from "@/app/types";
+import { FaCloudUploadAlt, FaThumbsUp } from "react-icons/fa";
+import { CSVRow, ClassType, Student, User } from "@/app/types";
 import Papa from "papaparse";
 
 interface CSVResult {
@@ -15,14 +15,17 @@ interface CSVResult {
 
 interface Props {
   classes: ClassType[];
+  user: User;
 }
 
-function DropzoneComponent({ classes }: Props) {
+function DropzoneComponent({ classes, user }: Props) {
   const [uploadStatus, setUploadStatus] = useState(false);
   const [validationError, setValidationError] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
   const openRef = useRef<() => void>(null);
 
   const handleFileUpload = (files: File[]) => {
+    setUploadStatus(false);
     const file = files[0];
     Papa.parse<CSVRow>(file, {
       header: true,
@@ -44,7 +47,7 @@ function DropzoneComponent({ classes }: Props) {
             reg_number: row.RegistrationNumber,
             mark: parseInt(row.Result),
             unique_code: row.UniqueCode,
-            year: new Date().getFullYear().toString(),
+            year: selectedYear ?? new Date().getFullYear().toString(),
           };
 
           students.push(student);
@@ -99,6 +102,13 @@ function DropzoneComponent({ classes }: Props) {
         }))}
         label="Please select a class from your taught classes"
       />
+      {user.role == 1 && (
+        <Select
+          data={["2020", "2021", "2022", "2023", "2024"]}
+          label="Please select a year to upload for:"
+          onChange={(value) => setSelectedYear(value!)}
+        />
+      )}
       <Container
         mt={25}
         ta="center"
@@ -110,15 +120,17 @@ function DropzoneComponent({ classes }: Props) {
           openRef={openRef}
           onDrop={handleFileUpload}
           accept={[MIME_TYPES.csv]}
+          color={uploadStatus == true ? "green" : "blue"}
         >
           <div style={{ pointerEvents: "none" }}>
             <Group justify="center">
+              <Dropzone.Accept>
+                <Text c="green">Accepted file type</Text>
+                <FaThumbsUp color="green" size={50} />
+              </Dropzone.Accept>
               <Dropzone.Idle>
                 <FaCloudUploadAlt size={50} />
               </Dropzone.Idle>
-              <Dropzone.Accept>
-                <FaCloudUploadAlt size={50} />
-              </Dropzone.Accept>
             </Group>
             <Text>
               <Dropzone.Idle>Upload CSV</Dropzone.Idle>

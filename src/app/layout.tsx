@@ -13,7 +13,7 @@ export default function RootLayout({
       <body>
         <MantineProvider>
           <UserProvider>
-            <div style={{ marginLeft: "4rem", marginTop: "1rem" }}>
+            <div style={{ marginLeft: "4rem" }}>
               {children}
               <Navbar />
             </div>

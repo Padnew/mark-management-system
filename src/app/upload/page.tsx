@@ -45,7 +45,9 @@ export default function Page() {
   return (
     <>
       <PageHeader heading={"Upload"} subHeading={"Upload student marks"} />
-      <DropzoneComponent classes={classes} />
+      {userContext && userContext.user && (
+        <DropzoneComponent classes={classes} user={userContext?.user} />
+      )}
     </>
   );
 }
