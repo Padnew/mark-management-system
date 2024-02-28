@@ -17,11 +17,11 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         setIsLoadingUser(false);
     }, []);
 
-    const login = async (username: string, password: string) => {
+    const login = async (email: string, password: string) => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password }),
+            body: JSON.stringify({ email, password }),
         });
 
         if (response.ok) {

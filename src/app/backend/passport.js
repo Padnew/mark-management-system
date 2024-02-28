@@ -1,39 +1,44 @@
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const connection = require("./connection");
+const bcrypt = require("bcrypt");
 
 passport.use(
-  new LocalStrategy((username, password, done) => {
-    const defaultPassword = "password";
-    connection.query(
-      "SELECT * FROM users WHERE email = ?",
-      [username],
-      (err, users) => {
-        if (err) {
-          return done(err);
-        }
+  new LocalStrategy(
+    { usernameField: "email", passwordField: "password" },
+    (email, password, done) => {
+      connection.query(
+        "SELECT * FROM users WHERE email = ?",
+        [email],
+        (err, users) => {
+          if (err) {
+            return done(err);
+          }
 
-        const user = users && users[0];
+          const user = users && users[0];
+          if (!user) {
+            return done(null, false, {
+              message: "Incorrect username or password.",
+            });
+          }
 
-        if (!user) {
-          console.log("User not found");
-          return done(null, false, {
-            message: "Incorrect username or password.",
+          bcrypt.compare(password, user.password, (err, isMatch) => {
+            if (err) {
+              return done(err);
+            }
+
+            if (isMatch) {
+              return done(null, user);
+            } else {
+              return done(null, false, {
+                message: "Incorrect username or password.",
+              });
+            }
           });
         }
-
-        if (password === defaultPassword) {
-          console.log("Password matches");
-          return done(null, user);
-        } else {
-          console.log("Password does not match");
-          return done(null, false, {
-            message: "Incorrect username or password.",
-          });
-        }
-      }
-    );
-  })
+      );
+    }
+  )
 );
 
 passport.serializeUser((user, cb) => {
