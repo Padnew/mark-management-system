@@ -7,7 +7,9 @@ import {
   Input,
   LoadingOverlay,
   Modal,
+  Stack,
   Table,
+  Title,
 } from "@mantine/core";
 import { Student } from "../types";
 import UserContext from "../context/UserContext";
@@ -18,9 +20,11 @@ import StudentInformationModal from "../_components/students/StudentInformationM
 
 async function getData(userId: number, role: number): Promise<Student[]> {
   const res =
-    role == 2
-      ? await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/${userId}`)
-      : await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/all`);
+    role == 1
+      ? await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/all`)
+      : await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/students/user/${userId}`
+        );
   if (!res.ok) {
     throw new Error("Failed to fetch data");
   }
@@ -39,18 +43,25 @@ export default function Page() {
   });
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [openStudentModal, setOpenStudentModal] = useState(false);
+  const [validLecturer, setValidLecturer] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
+    setLoading(true);
     const fetchData = async () => {
-      setLoading(true);
       if (userContext?.user) {
         try {
           const data = await getData(
             userContext.user.user_id,
             userContext.user.role
           );
-          setStudents(data);
+          if (
+            (data.length > 0 && userContext.user.role === 2) ||
+            userContext.user.role === 1
+          ) {
+            setValidLecturer(true);
+            setStudents(data);
+          }
         } catch (error) {
           console.error("Error fetching data:", error);
         }
@@ -121,56 +132,73 @@ export default function Page() {
           color="green"
           size="md"
           onClick={() => {}}
+          disabled={!validLecturer}
         >
           Export filtered group
         </Button>
       </Group>
       <hr />
-      <Table stickyHeader>
-        <Table.Thead bg="transparent">
-          <Table.Tr>
-            <Table.Th>
-              <Input
-                type="number"
-                name="reg_number"
-                value={filters.regNumber}
-                onChange={handleFilterChange}
-                placeholder="Reg Number"
-              />
-            </Table.Th>
-            <Table.Th>
-              <Input
-                type="text"
-                name="name"
-                value={filters.name}
-                onChange={handleFilterChange}
-                placeholder="Name"
-              />
-            </Table.Th>
-            <Table.Th>
-              <Input
-                type="text"
-                name="degree_name"
-                value={filters.degreeName}
-                onChange={handleFilterChange}
-                placeholder="Degree Name"
-              />
-            </Table.Th>
-            <Table.Th>
-              <Input
-                type="text"
-                name="degree_level"
-                value={filters.degreeLevel}
-                onChange={handleFilterChange}
-                placeholder="Degree Level"
-              />
-            </Table.Th>
-            <Table.Th></Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>{studentRows}</Table.Tbody>
-      </Table>
-
+      {validLecturer ? (
+        <Table stickyHeader>
+          <Table.Thead bg="transparent">
+            <Table.Tr>
+              <Table.Th>
+                <Input
+                  type="number"
+                  name="reg_number"
+                  value={filters.regNumber}
+                  onChange={handleFilterChange}
+                  placeholder="Reg Number"
+                />
+              </Table.Th>
+              <Table.Th>
+                <Input
+                  type="text"
+                  name="name"
+                  value={filters.name}
+                  onChange={handleFilterChange}
+                  placeholder="Name"
+                />
+              </Table.Th>
+              <Table.Th>
+                <Input
+                  type="text"
+                  name="degree_name"
+                  value={filters.degreeName}
+                  onChange={handleFilterChange}
+                  placeholder="Degree Name"
+                />
+              </Table.Th>
+              <Table.Th>
+                <Input
+                  type="text"
+                  name="degree_level"
+                  value={filters.degreeLevel}
+                  onChange={handleFilterChange}
+                  placeholder="Degree Level"
+                />
+              </Table.Th>
+              <Table.Th></Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>{studentRows}</Table.Tbody>
+        </Table>
+      ) : (
+        <Stack align="center">
+          <Title order={2} c="red">
+            You must upload marks before viewing student insights
+          </Title>
+          <Button
+            onClick={() => router.push("/upload")}
+            w="fit-content"
+            size="xl"
+            variant="outline"
+            color="red"
+          >
+            Upload Marks
+          </Button>
+        </Stack>
+      )}
       <Modal
         opened={openStudentModal}
         onClose={() => setOpenStudentModal(false)}
