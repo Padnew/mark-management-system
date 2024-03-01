@@ -21,11 +21,12 @@ import {
 import { useRouter } from "next/navigation";
 import Histogram from "../_components/analytics/Histogram";
 import {
+  CalculateClassAverages,
   GetHistoricalAverages,
   MakeHistogram,
 } from "../helpers/StatisticsHelper";
 import { PiRepeatOnceBold } from "react-icons/pi";
-import { AreaChart } from "@mantine/charts";
+import { AreaChart, BarChart } from "@mantine/charts";
 
 async function getAllClasses(
   user_id: number,
@@ -34,7 +35,9 @@ async function getAllClasses(
   const res =
     role == 1
       ? await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes/`)
-      : await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes/${user_id}`);
+      : await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/classes/user/${user_id}`
+        );
   if (!res.ok) {
     throw new Error("Failed to fetch data");
   }
@@ -52,11 +55,12 @@ export default function Page() {
   const [selectedYear, setSelectedYear] = useState("All");
   const [selectedDegreeLevel, setSelectedDegreeLevel] = useState("All");
   const [selectedCourse, setSelectedCourse] = useState("All");
-
+  const [validLecturer, setValidLecturer] = useState(false);
   const router = useRouter();
   if (!userContext?.isLoadingUser && !userContext?.user) {
     router.push("/404");
   }
+  const isAdmin = userContext?.user?.role === 1;
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -67,6 +71,12 @@ export default function Page() {
             userContext?.user.role
           );
           setClasses(data);
+          if (
+            (data.length > 0 && userContext.user.role === 2) ||
+            userContext.user.role === 1
+          ) {
+            setValidLecturer(true);
+          }
         } catch (error) {
           console.error("Error fetching classes:", error);
         }
@@ -116,8 +126,8 @@ export default function Page() {
   };
 
   function resetFilters() {
+    isAdmin && setSelectedClass("All");
     setSelectedCourse("All");
-    setSelectedClass("All");
     setSelectedDegreeLevel("All");
     setSelectedYear("All");
   }
@@ -133,7 +143,25 @@ export default function Page() {
     data.length > 0
       ? data.reduce((total, next) => total + next.result, 0) / data.length
       : 0;
-
+  const courseSelectData = [
+    { value: "Computer Science", label: "Computer Science" },
+    {
+      value: "Software Engineering",
+      label: "Software Engineering",
+    },
+    {
+      value: "Electrical Engineering",
+      label: "Electrical Engineering",
+    },
+    {
+      value: "Mathematics",
+      label: "Mathematics",
+    },
+    {
+      value: "Statistics",
+      label: "Statistics",
+    },
+  ];
   return (
     <>
       <PageHeader
@@ -141,7 +169,7 @@ export default function Page() {
         subHeading={"Insights into student performance"}
       />
       <LoadingOverlay
-        visible={loading}
+        visible={loading || loadingGraphData}
         zIndex={1000}
         overlayProps={{ radius: "sm", blur: 2 }}
       />
@@ -150,7 +178,7 @@ export default function Page() {
           <Grid.Col span={5}>
             <Select
               data={[
-                { value: "All", label: "All" },
+                ...(isAdmin ? [{ value: "All", label: "All" }] : []),
                 ...classes.map((classType) => ({
                   value: classType.class_code.toString(),
                   label: `${classType.class_code}: ${classType.class_name}`,
@@ -161,35 +189,21 @@ export default function Page() {
               size="md"
               value={selectedClass}
               onChange={(value) => setSelectedClass(value!)}
+              disabled={!validLecturer}
             />
           </Grid.Col>
           <Grid.Col span={5}>
             <Select
               data={[
-                { value: "All", label: "All" },
-                { value: "Computer Science", label: "Computer Science" },
-                {
-                  value: "Software Engineering",
-                  label: "Software Engineering",
-                },
-                {
-                  value: "Electrical Engineering",
-                  label: "Electrical Engineering",
-                },
-                {
-                  value: "Mathematics",
-                  label: "Mathematics",
-                },
-                {
-                  value: "Statistics",
-                  label: "Statistics",
-                },
+                ...(isAdmin ? [{ value: "All", label: "All" }] : []),
+                ...courseSelectData,
               ]}
               placeholder="Filter by course"
               label="Course"
               size="md"
               value={selectedCourse}
               onChange={(value) => setSelectedCourse(value!)}
+              disabled={!validLecturer}
             />
           </Grid.Col>
           <Grid.Col span={2}>
@@ -201,6 +215,7 @@ export default function Page() {
                 onClick={generateGraphs}
                 fullWidth
                 mx="lg"
+                disabled={!validLecturer}
               >
                 Generate Graphs
               </Button>
@@ -219,6 +234,7 @@ export default function Page() {
                 value={selectedDegreeLevel}
                 defaultChecked
                 onChange={(value) => setSelectedDegreeLevel(value)}
+                disabled={!validLecturer}
               />
             </Stack>
           </Grid.Col>
@@ -232,6 +248,7 @@ export default function Page() {
                 data={["All", "2020", "2021", "2022", "2023", "2024"]}
                 onChange={(value) => setSelectedYear(value)}
                 value={selectedYear}
+                disabled={!validLecturer}
               />
             </Stack>
           </Grid.Col>
@@ -244,6 +261,7 @@ export default function Page() {
                 onClick={resetFilters}
                 fullWidth
                 mx="lg"
+                disabled={!validLecturer}
               >
                 Clear Filters
               </Button>
@@ -251,38 +269,113 @@ export default function Page() {
           </Grid.Col>
         </Grid>
       </Paper>
-      <LoadingOverlay
-        visible={loadingGraphData}
-        zIndex={1000}
-        overlayProps={{ radius: "sm", blur: 2 }}
-      />
       <Center>
-        {studentResults && studentResults?.length == 0 && (
-          <Title order={2} c="red">
-            No results for those parameters
-          </Title>
-        )}
-        {studentResults && studentResults?.length > 0 && (
-          <Stack ta="center">
-            <Text>{`Results used in data: ${studentResults?.length}`}</Text>
-            <SimpleGrid cols={2}>
-              <Group>
-                <Histogram results={studentResults} />
-                <Flex>
-                  <PiRepeatOnceBold />
-                  {studentResults.reduce((acc, value) => {
-                    return (acc = acc > value.mark ? acc : value.mark);
-                  }, 0)}
-                </Flex>
-              </Group>
-              {selectedYear == "All" && (
-                <AreaChart
-                  data={GetHistoricalAverages(studentResults)}
-                  series={[{ name: "num", color: "#002b5c", label: "Average" }]}
-                  dataKey={"num"}
-                />
-              )}
-            </SimpleGrid>
+        {validLecturer ? (
+          <>
+            {studentResults && studentResults?.length == 0 && (
+              <Title order={2} c="red">
+                No results for those parameters
+              </Title>
+            )}
+            {studentResults && studentResults?.length > 0 && (
+              <Stack ta="center">
+                <Text>{`Results used in data: ${studentResults?.length}`}</Text>
+                <SimpleGrid cols={2}>
+                  <Group>
+                    <Stack>
+                      <Title order={4}>Outcomes of students</Title>
+                      <Histogram results={studentResults} />
+                    </Stack>
+                    <Flex>
+                      <PiRepeatOnceBold />
+                      {studentResults.reduce((acc, value) => {
+                        return (acc = acc > value.mark ? acc : value.mark);
+                      }, 0)}
+                    </Flex>
+                  </Group>
+                  {selectedYear == "All" && (
+                    <Stack>
+                      <Title order={4}>Average across each year</Title>
+                      <AreaChart
+                        w={650}
+                        h={450}
+                        curveType="linear"
+                        data={GetHistoricalAverages(studentResults)}
+                        series={[
+                          {
+                            name: "value",
+                            color: "#002b5c",
+                            label: "Average %",
+                          },
+                        ]}
+                        dataKey={"label"}
+                      />
+                    </Stack>
+                  )}
+                  {selectedYear != "All" && selectedClass == "All" && (
+                    <>
+                      <Stack>
+                        <Title order={4}>
+                          Average across each class for {selectedYear}
+                        </Title>
+                        <AreaChart
+                          w={650}
+                          h={450}
+                          curveType="linear"
+                          data={CalculateClassAverages(studentResults)}
+                          series={[
+                            {
+                              name: "average",
+                              color: "#002b5c",
+                              label: "Average %",
+                            },
+                          ]}
+                          dataKey={"classKey"}
+                        />
+                      </Stack>
+                    </>
+                  )}
+                  {selectedYear != "All" && selectedClass != "All" && (
+                    <Stack>
+                      <Title order={4}>
+                        Student marks for {selectedClass} in {selectedYear}
+                      </Title>
+                      <BarChart
+                        w={650}
+                        h={450}
+                        data={studentResults.sort((a, b) =>
+                          a.mark > b.mark ? 1 : 0
+                        )}
+                        dataKey="reg_number"
+                        series={[
+                          { name: "mark", color: "#002b5c", label: "Result" },
+                        ]}
+                        tooltipProps={{
+                          cursor: { fill: "none" },
+                          position: { x: 700, y: 0 },
+                        }}
+                        withXAxis={false}
+                      />
+                    </Stack>
+                  )}
+                </SimpleGrid>
+              </Stack>
+            )}
+          </>
+        ) : (
+          <Stack align="center">
+            <Title order={2} c="red">
+              You must upload marks before viewing analytics
+            </Title>
+            <Button
+              onClick={() => router.push("/upload")}
+              w="fit-content"
+              size="xl"
+              variant="outline"
+              color="red"
+            >
+              Upload Marks
+            </Button>
           </Stack>
         )}
       </Center>

@@ -116,7 +116,7 @@ app.get("/students/all", async (req, res) => {
   });
 });
 
-app.get("/students/:userId", async (req, res) => {
+app.get("/students/user/:userId", async (req, res) => {
   const { userId } = req.params;
   connection.query(
     "SELECT s.* FROM students s JOIN results r ON s.reg_number = r.reg_number JOIN classes c ON r.class_code = c.class_code WHERE c.user_id = ?",
@@ -296,7 +296,7 @@ app.get("/classes", async (req, res) => {
   });
 });
 
-app.get("/classes/:classCode", async (req, res) => {
+app.get("/classes/code/:classCode", async (req, res) => {
   const classCode = req.params.classCode;
   const query = "SELECT * from classes WHERE class_code = ?";
   connection.query(query, [classCode], (err, result) => {
@@ -310,7 +310,7 @@ app.get("/classes/:classCode", async (req, res) => {
   });
 });
 
-app.get("/classesByUser/:userId", async (req, res) => {
+app.get("/classes/user/:userId", async (req, res) => {
   const { userId } = req.params;
   connection.query(
     "SELECT * from classes WHERE user_id = ?",

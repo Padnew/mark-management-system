@@ -1,5 +1,5 @@
 import { ChartData } from "@mantine/charts";
-import { Result } from "../types";
+import { ClassType, Result } from "../types";
 
 export function MakeHistogram(results: Result[]) {
   const histogram = {
@@ -48,8 +48,41 @@ export function GetHistoricalAverages(results: Result[]) {
   const chartData = Object.keys(yearlyData).map((year) => {
     const { sum, num } = yearlyData[year];
     const average = num > 0 ? sum / num : 0;
-    return { label: year, value: average };
+    return { label: year, value: average.toFixed(2) };
+  });
+  console.log(chartData);
+  return chartData;
+}
+interface ClassAverage {
+  [classKey: string]: {
+    sum: number;
+    count: number;
+  };
+}
+
+export function CalculateClassAverages(results: Result[]) {
+  const classAverages: ClassAverage = {};
+
+  results.forEach((result) => {
+    const classKey = result.class_code;
+
+    if (!classAverages[classKey]) {
+      classAverages[classKey] = { sum: 0, count: 0 };
+    }
+
+    classAverages[classKey].sum += result.mark;
+    classAverages[classKey].count += 1;
   });
 
-  return chartData;
+  const graphData = Object.keys(classAverages).map((classKey) => {
+    const { sum, count } = classAverages[classKey];
+    const average = count > 0 ? sum / count : 0;
+
+    return {
+      classKey,
+      average: Number(average.toFixed(2)),
+    };
+  });
+
+  return graphData;
 }
