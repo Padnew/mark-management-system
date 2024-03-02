@@ -36,10 +36,10 @@ export default function Page() {
   const [students, setStudents] = useState<Student[] | undefined>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
-    regNumber: "",
+    reg_number: "",
     name: "",
-    degreeName: "",
-    degreeLevel: "",
+    degree_name: "",
+    degree_level: "",
   });
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [openStudentModal, setOpenStudentModal] = useState(false);
@@ -81,14 +81,14 @@ export default function Page() {
 
   const filteredStudents = students?.filter(
     (student) =>
-      student.reg_number.includes(filters.regNumber) &&
+      student.reg_number.includes(filters.reg_number) &&
       student.name.toLowerCase().includes(filters.name.toLowerCase()) &&
       student.degree_name
         .toLowerCase()
-        .includes(filters.degreeName.toLowerCase()) &&
+        .includes(filters.degree_name.toLowerCase()) &&
       student.degree_level
         .toLowerCase()
-        .includes(filters.degreeLevel.toLowerCase())
+        .includes(filters.degree_level.toLowerCase())
   );
 
   if (!userContext?.isLoadingUser && !userContext?.user) {
@@ -144,9 +144,9 @@ export default function Page() {
             <Table.Tr>
               <Table.Th>
                 <Input
-                  type="number"
+                  type="text"
                   name="reg_number"
-                  value={filters.regNumber}
+                  value={filters.reg_number}
                   onChange={handleFilterChange}
                   placeholder="Reg Number"
                 />
@@ -164,7 +164,7 @@ export default function Page() {
                 <Input
                   type="text"
                   name="degree_name"
-                  value={filters.degreeName}
+                  value={filters.degree_name}
                   onChange={handleFilterChange}
                   placeholder="Degree Name"
                 />
@@ -173,7 +173,7 @@ export default function Page() {
                 <Input
                   type="text"
                   name="degree_level"
-                  value={filters.degreeLevel}
+                  value={filters.degree_level}
                   onChange={handleFilterChange}
                   placeholder="Degree Level"
                 />
