@@ -3,6 +3,13 @@ import "./globals.css";
 import Navbar from "./_components/navigation/Navbar";
 import { MantineProvider } from "@mantine/core";
 import UserProvider from "./context/UserProvider";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Mark Mangement System",
+  description: "Modify, manage and analyise student marks",
+};
+
 export default function RootLayout({
   children,
 }: {
