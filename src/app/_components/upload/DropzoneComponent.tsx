@@ -96,10 +96,14 @@ function DropzoneComponent({ classes, user }: Props) {
   return (
     <Container size={800}>
       <Select
-        data={classes.map((classType) => ({
-          value: classType.class_code.toString(),
-          label: `${classType.class_code}: ${classType.class_name}`,
-        }))}
+        data={
+          Array.isArray(classes)
+            ? classes.map((classType) => ({
+                value: classType.class_code.toString(),
+                label: `${classType.class_code}: ${classType.class_name}`,
+              }))
+            : []
+        }
         label="Please select a class from your taught classes"
       />
       {user.role == 1 && (

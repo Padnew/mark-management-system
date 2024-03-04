@@ -179,10 +179,12 @@ export default function Page() {
             <Select
               data={[
                 ...(isAdmin ? [{ value: "All", label: "All" }] : []),
-                ...classes.map((classType) => ({
-                  value: classType.class_code.toString(),
-                  label: `${classType.class_code}: ${classType.class_name}`,
-                })),
+                ...(Array.isArray(classes)
+                  ? classes.map((classType) => ({
+                      value: classType.class_code.toString(),
+                      label: `${classType.class_code}: ${classType.class_name}`,
+                    }))
+                  : []),
               ]}
               placeholder="Filter by class"
               label="Class"
