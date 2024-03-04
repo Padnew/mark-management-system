@@ -2,7 +2,7 @@ const express = require("express");
 const passport = require("./passport");
 const connection = require("./connection");
 const app = express();
-
+const bcrypt = require("bcrypt");
 app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());
@@ -70,40 +70,47 @@ app.get("/lecturers/:userId", async (req, res) => {
 });
 
 app.post("/lecturer/create", async (req, res) => {
-  const { first_name, last_name, email } = req.body;
-  connection.query(
-    "SELECT * FROM users WHERE email = ?",
-    [email],
-    (err, result) => {
-      if (err) {
-        return res
-          .status(500)
-          .json({ success: false, message: "Error checking email" });
-      }
-
-      if (result.length > 0) {
-        return res
-          .status(500)
-          .json({ success: false, message: "Email already in use" });
-      } else {
-        connection.query(
-          "INSERT INTO users (first_name, last_name, email, role) VALUES (?, ?, ?, 2)",
-          [first_name, last_name, email],
-          (insertErr, insertResult) => {
-            if (insertErr) {
-              return res
-                .status(500)
-                .json({ success: false, message: "Failed to add Lecturer" });
-            }
-            return res.status(201).json({
-              success: true,
-              message: "Lecturer created successfully",
-            });
-          }
-        );
-      }
+  const { first_name, last_name, email, password } = req.body;
+  bcrypt.hash(password, 10, function (err, hash) {
+    if (err) {
+      return res
+        .status(500)
+        .json({ success: false, message: "Error hashing password" });
     }
-  );
+    connection.query(
+      "SELECT * FROM users WHERE email = ?",
+      [email],
+      (err, result) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({ success: false, message: "Error checking email" });
+        }
+
+        if (result.length > 0) {
+          return res
+            .status(500)
+            .json({ success: false, message: "Email already in use" });
+        } else {
+          connection.query(
+            "INSERT INTO users (first_name, last_name, email, role, password) VALUES (?, ?, ?, 2, ?)",
+            [first_name, last_name, email, hash],
+            (insertErr, insertResult) => {
+              if (insertErr) {
+                return res
+                  .status(500)
+                  .json({ success: false, message: "Failed to add Lecturer" });
+              }
+              return res.status(201).json({
+                success: true,
+                message: "Lecturer created successfully",
+              });
+            }
+          );
+        }
+      }
+    );
+  });
 });
 
 // STUDENT ENDPOINTS

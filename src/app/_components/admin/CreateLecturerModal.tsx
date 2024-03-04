@@ -22,6 +22,7 @@ function CreateLecturerModal({ onCreate }: Props) {
     };
 
     if (isValidUser(newLecturer)) {
+      const password = newLecturer.first_name.toLowerCase();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/lecturer/create`,
         {
@@ -31,6 +32,7 @@ function CreateLecturerModal({ onCreate }: Props) {
             first_name: firstName,
             last_name: lastName,
             email: email,
+            password: password,
           }),
         }
       );
