@@ -6,7 +6,6 @@ import UserContext from "../context/UserContext";
 import {
   Button,
   Center,
-  Flex,
   Grid,
   Group,
   LoadingOverlay,
@@ -23,9 +22,7 @@ import Histogram from "../_components/analytics/Histogram";
 import {
   CalculateClassAverages,
   GetHistoricalAverages,
-  MakeHistogram,
 } from "../helpers/StatisticsHelper";
-import { PiRepeatOnceBold } from "react-icons/pi";
 import { AreaChart, BarChart } from "@mantine/charts";
 
 async function getAllClasses(
@@ -55,6 +52,7 @@ export default function Page() {
   const [selectedYear, setSelectedYear] = useState("All");
   const [selectedDegreeLevel, setSelectedDegreeLevel] = useState("All");
   const [selectedCourse, setSelectedCourse] = useState("All");
+  const [selectedStudent, setSelectedStudent] = useState("");
   const [validLecturer, setValidLecturer] = useState(false);
   const router = useRouter();
   if (!userContext?.isLoadingUser && !userContext?.user) {
@@ -270,6 +268,28 @@ export default function Page() {
             </Center>
           </Grid.Col>
         </Grid>
+        <Grid>
+          <Grid.Col span={5}>
+            <Stack gap={0}>
+              <Select
+                placeholder="Filter by Student"
+                label="Student"
+                size="md"
+                data={
+                  studentResults
+                    ? studentResults?.map((result) => ({
+                        value: result.reg_number,
+                        label: result.reg_number,
+                      }))
+                    : []
+                }
+                value={selectedStudent}
+                onChange={(value) => setSelectedStudent(value!)}
+                disabled={!validLecturer || selectedClass == "All"}
+              />
+            </Stack>
+          </Grid.Col>
+        </Grid>
       </Paper>
       <Center>
         {validLecturer ? (
@@ -288,12 +308,6 @@ export default function Page() {
                       <Title order={4}>Outcomes of students</Title>
                       <Histogram results={studentResults} />
                     </Stack>
-                    <Flex>
-                      <PiRepeatOnceBold />
-                      {studentResults.reduce((acc, value) => {
-                        return (acc = acc > value.mark ? acc : value.mark);
-                      }, 0)}
-                    </Flex>
                   </Group>
                   {selectedYear == "All" && (
                     <Stack>
@@ -320,11 +334,13 @@ export default function Page() {
                         <Title order={4}>
                           Average across each class for {selectedYear}
                         </Title>
-                        <AreaChart
+                        <BarChart
                           w={650}
                           h={450}
-                          curveType="linear"
                           data={CalculateClassAverages(studentResults)}
+                          tooltipProps={{
+                            cursor: { fill: "none" },
+                          }}
                           series={[
                             {
                               name: "average",
@@ -354,7 +370,6 @@ export default function Page() {
                         ]}
                         tooltipProps={{
                           cursor: { fill: "none" },
-                          position: { x: 700, y: 0 },
                         }}
                         withXAxis={false}
                       />

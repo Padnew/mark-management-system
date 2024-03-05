@@ -16,8 +16,7 @@ function Histogram({ results }: Props) {
       data={data}
       dataKey="label"
       series={[{ name: "value", color: "#002b5c", label: "No. Students" }]}
-      tooltipProps={{ cursor: { fill: "none" }, position: { x: 100, y: 0 } }}
-      legendProps={{ verticalAlign: "bottom", width: 60 }}
+      tooltipProps={{ cursor: { fill: "none" } }}
     />
   );
 }
