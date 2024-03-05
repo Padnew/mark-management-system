@@ -63,7 +63,6 @@ function EditClassModal({ classType, lecturers, onUpdate }: Props) {
     if (!res.ok) {
       throw new Error("Failed to lock class");
     } else {
-      console.log(res.text);
       setLocked(!locked);
     }
   };
