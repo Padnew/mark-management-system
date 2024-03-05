@@ -115,12 +115,15 @@ app.post("/lecturer/create", async (req, res) => {
 
 // STUDENT ENDPOINTS
 app.get("/students/all", async (req, res) => {
-  connection.query("SELECT * from students", (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: "Internal Server Error" });
+  connection.query(
+    "SELECT students.* from students WHERE students.reg_number in (SELECT reg_number FROM results WHERE Year = 2024)",
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+      return res.json(result);
     }
-    return res.json(result);
-  });
+  );
 });
 
 app.get("/students/user/:userId", async (req, res) => {
@@ -157,7 +160,7 @@ app.post("/students/create", (req, res) => {
         error: error.message,
       });
     } else {
-      return res.json({
+      return res.status(201).json({
         success: true,
         message: "Student inserted successfully",
       });
@@ -249,7 +252,7 @@ app.post("/results/create", async (req, res) => {
         error: error.message,
       });
     } else {
-      return res.json({
+      return res.status(201).json({
         success: true,
         message: "Results inserted successfully",
       });
@@ -261,26 +264,26 @@ app.post("/results/queried", async (req, res) => {
   const { class: classFilter, course, degreeLevel, year } = req.body;
 
   let query = `
-    SELECT r.result_id, r.class_code, r.reg_number, r.mark, r.unique_code, r.year, s.degree_name, s.degree_level
-    FROM results r
-    INNER JOIN students s ON r.reg_number = s.reg_number
+    SELECT results.result_id, results.class_code, results.reg_number, results.mark, results.unique_code, results.year, students.degree_name, students.degree_level
+    FROM results
+    INNER JOIN students ON results.reg_number = students.reg_number
   `;
-  const conditions = [];
+  const params = [];
 
   if (classFilter) {
-    conditions.push(`r.class_code = '${classFilter}'`);
+    params.push(`results.class_code = '${classFilter}'`);
   }
   if (year) {
-    conditions.push(`r.year = '${year}'`);
+    params.push(`results.year = '${year}'`);
   }
   if (degreeLevel) {
-    conditions.push(`s.degree_level = '${degreeLevel}'`);
+    params.push(`students.degree_level = '${degreeLevel}'`);
   }
   if (course) {
-    conditions.push(`s.degree_name = '${course}'`);
+    params.push(`students.degree_name = '${course}'`);
   }
-  if (conditions.length > 0) {
-    query += " WHERE " + conditions.join(" AND ");
+  if (params.length > 0) {
+    query += " WHERE " + params.join(" AND ");
   }
   connection.query(query, (err, result) => {
     if (err) {
@@ -289,6 +292,21 @@ app.post("/results/queried", async (req, res) => {
       return res.status(404).json({ message: "No results found" });
     } else {
       return res.json(result);
+    }
+  });
+});
+
+app.post("/results/regnumbers", async (req, res) => {
+  const regNumbers = req.body;
+  const placeholders = regNumbers.map(() => "?").join(",");
+  const queryString = `SELECT * FROM results WHERE reg_number IN (${placeholders})`;
+  connection.query(queryString, regNumbers, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: "Internal Server Error" });
+    } else if (results.length === 0) {
+      return res.status(404).json({ error: "No results found" });
+    } else {
+      return res.json(results);
     }
   });
 });
@@ -376,7 +394,7 @@ app.post("/classes/create", (req, res) => {
           error: error.message,
         });
       } else {
-        return res.json({
+        return res.status(201).json({
           success: true,
           message: "Class created successfully",
         });
