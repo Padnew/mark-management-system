@@ -15,8 +15,10 @@ import { Student } from "../types";
 import UserContext from "../context/UserContext";
 import { useRouter } from "next/navigation";
 import { EditButton } from "../_components/shared/EditButton";
-import { FaChartLine, FaEye, FaFileExport } from "react-icons/fa";
+import { FaChartLine, FaEye, FaFileExport, FaTv } from "react-icons/fa";
 import StudentInformationModal from "../_components/students/StudentInformationModal";
+import { exportStudentsToCSV } from "../helpers/StudentsHelper";
+import ExportStudentToCSVModal from "../_components/students/ExportStudentToCSVModal";
 
 async function getData(userId: number, role: number): Promise<Student[]> {
   const res =
@@ -43,11 +45,11 @@ export default function Page() {
   });
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [openStudentModal, setOpenStudentModal] = useState(false);
+  const [openExportModal, setOpenExportModal] = useState(false);
   const [validLecturer, setValidLecturer] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    setLoading(true);
     const fetchData = async () => {
       if (userContext?.user) {
         try {
@@ -69,6 +71,7 @@ export default function Page() {
     };
 
     if (userContext && !userContext.isLoadingUser) {
+      setLoading(true);
       fetchData();
       setLoading(false);
     }
@@ -125,19 +128,33 @@ export default function Page() {
         zIndex={1000}
         overlayProps={{ radius: "sm", blur: 2 }}
       />
-      <Group py={10} pl={5} align="flex-end">
-        <Button
-          leftSection={<FaFileExport />}
-          variant="outline"
-          color="green"
-          size="md"
-          onClick={() => {}}
-          disabled={!validLecturer}
-        >
-          Export filtered group
-        </Button>
-      </Group>
-      <hr />
+      {userContext && userContext.user?.role == 1 && (
+        <>
+          <Group py={10} pl={5} align="flex-end">
+            <Button
+              leftSection={<FaTv />}
+              variant="outline"
+              color="blue"
+              size="md"
+              onClick={() => {}}
+              disabled={!validLecturer}
+            >
+              View filtered group
+            </Button>
+            <Button
+              leftSection={<FaFileExport />}
+              variant="outline"
+              color="green"
+              size="md"
+              onClick={() => setOpenExportModal(true)}
+              disabled={!validLecturer}
+            >
+              Export filtered group
+            </Button>
+          </Group>
+          <hr />
+        </>
+      )}
       {validLecturer ? (
         <Table stickyHeader>
           <Table.Thead bg="transparent">
@@ -205,6 +222,13 @@ export default function Page() {
         title="Student information"
       >
         <StudentInformationModal student={selectedStudent!} />
+      </Modal>
+      <Modal
+        opened={openExportModal}
+        onClose={() => setOpenExportModal(false)}
+        title="Export students to CSV"
+      >
+        <ExportStudentToCSVModal students={filteredStudents!} />
       </Modal>
     </>
   );
