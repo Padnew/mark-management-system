@@ -35,7 +35,6 @@ interface YearlyAverages {
 
 export function GetHistoricalAverages(results: Result[]) {
   const yearlyData: YearlyAverages = {};
-
   results.forEach((result) => {
     const { year, mark } = result;
     if (!yearlyData[year]) {
@@ -50,7 +49,6 @@ export function GetHistoricalAverages(results: Result[]) {
     const average = num > 0 ? sum / num : 0;
     return { label: year, value: average.toFixed(2) };
   });
-  console.log(chartData);
   return chartData;
 }
 interface ClassAverage {
