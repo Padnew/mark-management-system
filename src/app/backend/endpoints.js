@@ -179,7 +179,7 @@ app.delete("students/clear", (res, req) => {
           error: error.message,
         });
       } else {
-        return res.json({
+        return res.status(204).json({
           success: true,
           message: "Cleared excess students",
         });
@@ -317,7 +317,7 @@ app.get("/classes", async (req, res) => {
     if (err) {
       return res.status(500).json({ error: "Internal Server Error" });
     }
-    return res.json(result);
+    return res.status(200).json(result);
   });
 });
 
@@ -345,7 +345,7 @@ app.get("/classes/user/:userId", async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
       }
       if (result.length === 0) {
-        return res.status(200).json({ error: "No classes found" });
+        return res.status(404).json({ error: "No classes found" });
       }
       return res.json(result);
     }
@@ -371,7 +371,7 @@ app.post("/classes/update", (req, res) => {
           message: "Class not found",
         });
       } else {
-        return res.json({
+        return res.status(204).json({
           success: true,
           message: "Class updated successfully",
         });
@@ -413,7 +413,25 @@ app.post("/classes/locked", (req, res) => {
         message: "Failed to update class",
       });
     } else {
-      return res.json({ success: true, message: "Updated class successfully" });
+      return res
+        .status(204)
+        .json({ success: true, message: "Updated class successfully" });
+    }
+  });
+});
+
+app.get("/classes/reset", (req, res) => {
+  connection.query("UPDATE classes SET user_id = NULL", (error, results) => {
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to reset class",
+      });
+    } else {
+      return res.status(204).json({
+        success: true,
+        message: "Reset all classes successfully",
+      });
     }
   });
 });
