@@ -7,7 +7,10 @@ app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());
 
-//USER ENDPOINTS
+/* USER ENDPOINTS
+Purpose: Authenticating a login using the local strategy in passport.js
+Parameters: NONE
+*/
 app.post("/login", (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
     if (err) {
@@ -34,15 +37,10 @@ app.post("/login", (req, res, next) => {
   })(req, res, next);
 });
 
-app.get("/userauth", (req, res) => {
-  if (req.isAuthenticated()) {
-    res.json({ user: req.user });
-  } else {
-    res.status(401).json({ error: "User not authenticated" });
-  }
-});
-
-// LECTURER ENDPOINTS
+/* LECTURER ENDPOINTS
+Purpose: To get all users with the role of 2 (Lecturers), listed in the admin page
+Parameters: NONE
+*/
 app.get("/lecturers", async (req, res) => {
   connection.query(
     "SELECT * from users where role = 2",
@@ -54,7 +52,10 @@ app.get("/lecturers", async (req, res) => {
     }
   );
 });
-
+/*
+Purpose: To get a single lecturer by their user_id, used in the admin page
+Parameters: NONE
+*/
 app.get("/lecturers/:userId", async (req, res) => {
   const userId = req.params.userId;
   const query = "SELECT * from users WHERE user_id = ?";
@@ -69,6 +70,10 @@ app.get("/lecturers/:userId", async (req, res) => {
   });
 });
 
+/*
+Purpose: For creating a new lecturer in the system
+Parameters: first name, last name, email and password
+*/
 app.post("/lecturer/create", async (req, res) => {
   const { first_name, last_name, email, password } = req.body;
   bcrypt.hash(password, 10, function (err, hash) {
@@ -113,7 +118,10 @@ app.post("/lecturer/create", async (req, res) => {
   });
 });
 
-// STUDENT ENDPOINTS
+/* STUDENT ENDPOINTS
+Purpose: Gets all the students with results from the current year (i.e all current students for this year)
+Parameters: NONE
+*/
 app.get("/students/all", async (req, res) => {
   connection.query(
     "SELECT students.* from students WHERE students.reg_number in (SELECT reg_number FROM results WHERE Year = 2024)",
@@ -126,6 +134,10 @@ app.get("/students/all", async (req, res) => {
   );
 });
 
+/*
+Purpose: For getting all students in classes taught by a lecturer
+Parameters: user_id of lecturer
+*/
 app.get("/students/user/:userId", async (req, res) => {
   const { userId } = req.params;
   connection.query(
@@ -140,6 +152,10 @@ app.get("/students/user/:userId", async (req, res) => {
   );
 });
 
+/*
+Purpose: For bulk inserting new students into the system from a csv file
+Parameters: An array of students (reg numbers, names, degree names and degree levels)
+*/
 app.post("/students/create", (req, res) => {
   const students = req.body;
 
@@ -168,6 +184,10 @@ app.post("/students/create", (req, res) => {
   });
 });
 
+/*
+Purpose: For clearing any students in the system who do not have marks (i.e old students/historical outdated data)
+Parameters: NONE
+*/
 app.delete("students/clear", (res, req) => {
   connection.query(
     "DELETE FROM students WHERE reg_number NOT IN (SELECT reg_number FROM Results)",
@@ -188,7 +208,10 @@ app.delete("students/clear", (res, req) => {
   );
 });
 
-// RESULTS ENDPOINTS
+/* RESULTS ENDPOINTS
+Purpose: For getting all results in the system
+Parameters: NONE
+*/
 app.get("/results", async (req, res) => {
   connection.query("SELECT * from results", (err, result) => {
     if (err) {
@@ -200,7 +223,10 @@ app.get("/results", async (req, res) => {
     }
   });
 });
-
+/*
+Purpose: For getting all results of a student from a specific year (Typically the current year but can be open to historical look ups)
+Parameters: Registration number of the student and the year
+*/
 app.post("/results/detailed", async (req, res) => {
   const { regNumber, year } = req.body;
   connection.query(
@@ -217,7 +243,10 @@ app.post("/results/detailed", async (req, res) => {
     }
   );
 });
-
+/*
+Purpose: For getting all the results of the classes taught by a lecturer (I.e Lecturer viewing the results of their classes)
+Parameters: User_id of the lecturer
+*/
 app.get("/results/:userId", async (req, res) => {
   const { userId } = req.params;
   const query =
@@ -233,6 +262,10 @@ app.get("/results/:userId", async (req, res) => {
   });
 });
 
+/*
+Purpose: For bulk inserting an array of results of students, typically from a csv file
+Parameters: An array of results (class code, registration number of the student, mark, unique code and the year of result)
+*/
 app.post("/results/create", async (req, res) => {
   const results = req.body;
   const query =
@@ -259,17 +292,21 @@ app.post("/results/create", async (req, res) => {
     }
   });
 });
-
+/*
+Purpose: For returning dynamically filtered results data for the analytics page
+Parameters: NONE
+Side note: This one endpoint and logic took me roughly 3, 6 hour days to get working as I refused to handle the request in the front end nor create 25 endpoints for each filter combination
+*/
 app.post("/results/queried", async (req, res) => {
   const { class: classFilter, course, degreeLevel, year } = req.body;
-
   let query = `
     SELECT results.result_id, results.class_code, results.reg_number, results.mark, results.unique_code, results.year, students.degree_name, students.degree_level
     FROM results
     INNER JOIN students ON results.reg_number = students.reg_number
   `;
+  //To avoid using 5^2 endpoints it can be reduced to this single endpoint by just dynamically building the query depending on the parameters taht are passed into the body of the request
   const params = [];
-
+  //This approach allows any combination of filters to be put onto request. This is the benefit of using raw SQL over ORMs is that it can be as simple as a string builder
   if (classFilter) {
     params.push(`results.class_code = '${classFilter}'`);
   }
@@ -282,6 +319,7 @@ app.post("/results/queried", async (req, res) => {
   if (course) {
     params.push(`students.degree_name = '${course}'`);
   }
+  //params.join allows each of the parameters (if any) to be joined by an AND. This allows for any amount of filters in the request
   if (params.length > 0) {
     query += " WHERE " + params.join(" AND ");
   }
@@ -295,10 +333,17 @@ app.post("/results/queried", async (req, res) => {
     }
   });
 });
-
+/*
+Purpose: For bulk returning all results from a group of registration numbers
+Parameters: An array of registration numbers of students to get results from
+Side note: This is also a dynamic query similar to /results/queried, it will generate as many placeholders as there are regNumbers
+*/
 app.post("/results/regnumbers", async (req, res) => {
   const regNumbers = req.body;
+  //Creates as many '?' placeHolders in the query as there are registration numbers
   const placeholders = regNumbers.map(() => "?").join(",");
+  //This approach allows any number of students to have their results queried
+  //Another simplified approach to reduce the front end load and the amount of endpoints required
   const queryString = `SELECT * FROM results WHERE reg_number IN (${placeholders})`;
   connection.query(queryString, regNumbers, (err, results) => {
     if (err) {
@@ -311,7 +356,10 @@ app.post("/results/regnumbers", async (req, res) => {
   });
 });
 
-// CLASSES ENDPOINTS
+/* CLASSES ENDPOINTS
+Purpose: Gets all the classes in the database
+Parameters: NONE
+*/
 app.get("/classes", async (req, res) => {
   connection.query("SELECT * from classes", (err, result) => {
     if (err) {
@@ -320,7 +368,11 @@ app.get("/classes", async (req, res) => {
     return res.status(200).json(result);
   });
 });
-
+/*
+Purpose: To get a specific class by it's class code
+Parameters: Class code
+Side note: The route had to be '/classes/code/:classCode' as it conflicted with '/classes/:userId' and to provide clarity
+*/
 app.get("/classes/code/:classCode", async (req, res) => {
   const classCode = req.params.classCode;
   const query = "SELECT * from classes WHERE class_code = ?";
@@ -334,7 +386,11 @@ app.get("/classes/code/:classCode", async (req, res) => {
     return res.json(result);
   });
 });
-
+/*
+Purpose: To get a specific class by it's lecturer/user assigned to it
+Parameters: User Id
+Side note: The route had to be '/classes/user/:userId' as it conflicted previously with '/classes/:classCode' and to provide clarity
+*/
 app.get("/classes/user/:userId", async (req, res) => {
   const { userId } = req.params;
   connection.query(
@@ -351,7 +407,10 @@ app.get("/classes/user/:userId", async (req, res) => {
     }
   );
 });
-
+/*
+Purpose: To update a specific class by it's class code
+Parameters: Class name, credit level, credits, user_id(Lecturer) and the class code to specific the class to be updated
+*/
 app.post("/classes/update", (req, res) => {
   const { className, credits, lecturer, classCode, creditLevel } = req.body;
   connection.query(
@@ -379,7 +438,10 @@ app.post("/classes/update", (req, res) => {
     }
   );
 });
-
+/*
+Purpose: To create a new class in the system
+Parameters: Class code, Class name, credit level, credits, locked state (Always 0) and the Lecturer (User_id of lecturer)
+*/
 app.post("/classes/create", (req, res) => {
   const { classCode, className, creditLevel, credits, locked, lecturer } =
     req.body;
@@ -402,7 +464,10 @@ app.post("/classes/create", (req, res) => {
     }
   );
 });
-
+/*
+Purpose: To change the locked status of a class 
+Parameters: The classcode of the class to be locked and the new locked state (Either 0 or 1)
+*/
 app.post("/classes/locked", (req, res) => {
   const { classCode, lockedNumber } = req.body;
   const query = "UPDATE classes SET locked = ? WHERE class_code = ?";
@@ -419,7 +484,10 @@ app.post("/classes/locked", (req, res) => {
     }
   });
 });
-
+/*
+Purpose: To reset every lecturer assigned to every class (I.e new academic year and new lecturers of each class)
+Parameters: NONE
+*/
 app.get("/classes/reset", (req, res) => {
   connection.query("UPDATE classes SET user_id = NULL", (error, results) => {
     if (error) {

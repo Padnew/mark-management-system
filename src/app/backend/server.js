@@ -12,6 +12,7 @@ const app = express();
 const port = 20502;
 
 app.use(cors());
+//Session from express session, visit passport.js for the serialisation and deserialisation
 app.use(
   session({
     secret: "voirdirevoirdire",
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());
 
+//Allows all endpoints accessible from the server
 app.use("/", endpoints);
 
 app.listen(port, () => {

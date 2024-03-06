@@ -4,6 +4,7 @@ const connection = require("./connection");
 const bcrypt = require("bcrypt");
 
 passport.use(
+  //Standard local strategy which relies on an encrypted password and email from the database
   new LocalStrategy(
     { usernameField: "email", passwordField: "password" },
     (email, password, done) => {
@@ -14,14 +15,14 @@ passport.use(
           if (err) {
             return done(err);
           }
-
+          //Although there can't be many users with the same email it will default to the first if there is
           const user = users && users[0];
           if (!user) {
             return done(null, false, {
               message: "Incorrect username or password.",
             });
           }
-
+          //Compare the password given by the front end to the decrypted password from the database
           bcrypt.compare(password, user.password, (err, isMatch) => {
             if (err) {
               return done(err);
@@ -41,10 +42,11 @@ passport.use(
   )
 );
 
+//Serialising a session is important for storing the logged in users
 passport.serializeUser((user, cb) => {
   cb(null, user.user_id);
 });
-
+//As is deserialising a session
 passport.deserializeUser((id, cb) => {
   connection.query(
     "SELECT * FROM users WHERE user_id = ?",
