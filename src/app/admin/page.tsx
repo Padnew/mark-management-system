@@ -1,15 +1,25 @@
 "use client";
-import React, { useContext, useEffect, useState } from 'react'
-import PageHeader from '../_components/shared/PageHeader'
-import { Button, Grid, GridCol, Group, LoadingOverlay, Modal, Table, Title} from '@mantine/core'
-import { FaEye, FaPlus, FaTrash } from 'react-icons/fa';
-import { EditButton } from '../_components/shared/EditButton';
-import { ClassType, Lecturer, User } from '../types';
-import EditClassModal from '../_components/admin/EditClassModal';
-import CreateClassModal from '../_components/admin/CreateClassModal';
-import CreateLecturerModal from '../_components/admin/CreateLecturerModal';
-import UserContext from '../context/UserContext';
-import { useRouter } from 'next/navigation';
+import React, { useContext, useEffect, useState } from "react";
+import PageHeader from "../_components/shared/PageHeader";
+import {
+  Button,
+  Grid,
+  GridCol,
+  Group,
+  LoadingOverlay,
+  Modal,
+  Table,
+  Title,
+} from "@mantine/core";
+import { FaEye, FaPlus, FaTrash } from "react-icons/fa";
+import { EditButton } from "../_components/shared/EditButton";
+import { ClassType, Lecturer, User } from "../types";
+import EditClassModal from "../_components/admin/EditClassModal";
+import CreateClassModal from "../_components/admin/CreateClassModal";
+import CreateLecturerModal from "../_components/admin/CreateLecturerModal";
+import UserContext from "../context/UserContext";
+import { useRouter } from "next/navigation";
+import ConfirmResetAssignedLecturersModal from "../_components/admin/ConfirmResetAssignedLecturersModal";
 
 export default function Page() {
   const [classes, setClasses] = useState<ClassType[] | undefined>([]);
@@ -18,89 +28,104 @@ export default function Page() {
   const [updateClassModalOpened, setUpdateClassModalOpened] = useState(false);
   const [createModalOpened, setCreateModalOpened] = useState(false);
   const [lecturerModalOpened, setLecturerModalOpened] = useState(false);
+  const [resetAssignedLecturersModal, setResetAssignedLecturersModal] =
+    useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassType | null>(null);
   const userContext = useContext(UserContext);
   const router = useRouter();
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      await fetchClasses();
-      await fetchLecturers();
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (userContext && !userContext.isLoadingUser && userContext.user?.role == 2) {
-    router.push('/404')
+  if (
+    userContext &&
+    !userContext.isLoadingUser &&
+    userContext.user?.role == 2
+  ) {
+    router.push("/404");
   }
 
-  const clearExcessStudents = async () => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/clear`)
+  async function clearExcessStudents() {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/students/clear`
+    );
     if (!res.ok) {
-      throw new Error('Failed to clear excess students');
+      throw new Error("Failed to clear excess students");
     }
   }
 
-  const fetchClasses = async () => {
+  async function fetchClasses() {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes`);
     if (!res.ok) {
-      throw new Error('Failed to fetch classes');
+      throw new Error("Failed to fetch classes");
     }
     const data = await res.json();
     setClasses(data);
-    setUpdateClassModalOpened(false)
-  };
-  
-  const fetchLecturers = async () => {
+    setUpdateClassModalOpened(false);
+  }
+
+  async function fetchLecturers() {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/lecturers`);
     if (!res.ok) {
-      throw new Error('Failed to fetch lecturers');
+      throw new Error("Failed to fetch lecturers");
     }
     const data = await res.json();
     setLecturers(data);
-  };
-  
+  }
+
   useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      try {
+        await fetchClasses();
+        await fetchLecturers();
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
+
   const handleCreateClass = () => {
-    fetchClasses()
+    fetchClasses();
     setCreateModalOpened(false);
   };
-  
+  const handleResetLecturers = () => {
+    fetchClasses();
+    setResetAssignedLecturersModal(false);
+  };
+
   const handleCreateLecturer = () => {
     fetchLecturers();
     setLecturerModalOpened(false);
   };
-  
-  const handleCloseUpdateClassModal = () => {
+
+  const handleCloseModal = () => {
     setCreateModalOpened(false);
     setLecturerModalOpened(false);
     setUpdateClassModalOpened(false);
   };
 
-  
-  const classRows = classes!.map((classType)=>(
-    <Table.Tr key={classType.class_code}  bg={classType.locked ? 'red' : ''}>
+  const classRows = classes!.map((classType) => (
+    <Table.Tr key={classType.class_code} bg={classType.locked ? "red" : ""}>
       <Table.Td>{classType.class_code}</Table.Td>
       <Table.Td>{classType.class_name}</Table.Td>
       <Table.Td>{classType.credit_level}</Table.Td>
       <Table.Td>{classType.credits}</Table.Td>
-      <Table.Td>{classType.user_id ?? 'Unassigned'}</Table.Td>
-      <Table.Td><EditButton onclick={() => {
-      setSelectedClass(classType);
-      setUpdateClassModalOpened(true);
-    }} label={`Edit ${classType.class_code}` } icon={<FaEye/>}/></Table.Td>
+      <Table.Td>{classType.user_id ?? "Unassigned"}</Table.Td>
+      <Table.Td>
+        <EditButton
+          onclick={() => {
+            setSelectedClass(classType);
+            setUpdateClassModalOpened(true);
+          }}
+          label={`Edit ${classType.class_code}`}
+          icon={<FaEye />}
+        />
+      </Table.Td>
     </Table.Tr>
   ));
 
-  const lecturerRows = lecturers!.map((lecturer)=>(
+  const lecturerRows = lecturers!.map((lecturer) => (
     <Table.Tr key={lecturer.user_id}>
       <Table.Td>{lecturer.user_id}</Table.Td>
       <Table.Td>{lecturer.first_name}</Table.Td>
@@ -111,14 +136,54 @@ export default function Page() {
 
   return (
     <>
-    <PageHeader heading={'Admin'} subHeading={'Manage Lecturers and Classes'}/>
-      <Group py={10} pl={5} align='flex-end'>
-        <Button leftSection={<FaPlus/>} variant='outline' color='green' size='md' onClick={() => setCreateModalOpened(true)}>Add new class</Button>
-        <Button leftSection={<FaPlus/>} variant='outline' color='green' size='md' onClick={()=> setLecturerModalOpened(true)}>Add new lecturer</Button>
-        <Button leftSection={<FaTrash/>} variant='outline' color='red' size='md' onClick={clearExcessStudents}>Clear excess students</Button>
+      <PageHeader
+        heading={"Admin"}
+        subHeading={"Manage Lecturers and Classes"}
+      />
+      <Group py={10} pl={5} align="flex-end">
+        <Button
+          leftSection={<FaPlus />}
+          variant="outline"
+          color="green"
+          size="md"
+          onClick={() => setCreateModalOpened(true)}
+        >
+          Add new class
+        </Button>
+        <Button
+          leftSection={<FaPlus />}
+          variant="outline"
+          color="green"
+          size="md"
+          onClick={() => setLecturerModalOpened(true)}
+        >
+          Add new lecturer
+        </Button>
+        <Button
+          leftSection={<FaTrash />}
+          variant="outline"
+          color="red"
+          size="md"
+          onClick={clearExcessStudents}
+        >
+          Clear excess students
+        </Button>
+        <Button
+          leftSection={<FaTrash />}
+          variant="outline"
+          color="red"
+          size="md"
+          onClick={() => setResetAssignedLecturersModal(true)}
+        >
+          Unassigned all Lecturers
+        </Button>
       </Group>
-      <hr/>
-    <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+      <hr />
+      <LoadingOverlay
+        visible={loading}
+        zIndex={1000}
+        overlayProps={{ radius: "sm", blur: 2 }}
+      />
       <Grid mx={10}>
         <GridCol span={6}>
           <Title>Classes</Title>
@@ -133,7 +198,7 @@ export default function Page() {
                 <Table.Td></Table.Td>
               </Table.Tr>
             </Table.Thead>
-              <Table.Tbody>{classRows}</Table.Tbody>
+            <Table.Tbody>{classRows}</Table.Tbody>
           </Table>
         </GridCol>
         <GridCol span={6}>
@@ -152,15 +217,44 @@ export default function Page() {
         </GridCol>
       </Grid>
 
-      <Modal opened={updateClassModalOpened} onClose={handleCloseUpdateClassModal} title='Update Class'>
-        <EditClassModal lecturers={lecturers || []} classType={selectedClass!} onUpdate={fetchClasses} />
+      <Modal
+        opened={updateClassModalOpened}
+        onClose={handleCloseModal}
+        title="Update Class"
+      >
+        <EditClassModal
+          lecturers={lecturers || []}
+          classType={selectedClass!}
+          onUpdate={fetchClasses}
+        />
       </Modal>
-      <Modal opened={createModalOpened} onClose={handleCloseUpdateClassModal} title='Create New Class'>
-        <CreateClassModal lecturers={lecturers || []} onCreate={handleCreateClass} />
+      <Modal
+        opened={createModalOpened}
+        onClose={handleCloseModal}
+        title="Create New Class"
+      >
+        <CreateClassModal
+          lecturers={lecturers || []}
+          onCreate={handleCreateClass}
+        />
       </Modal>
-      <Modal opened={lecturerModalOpened} onClose={handleCloseUpdateClassModal} title='Create New Lecturer'>
+      <Modal
+        opened={lecturerModalOpened}
+        onClose={handleCloseModal}
+        title="Create New Lecturer"
+      >
         <CreateLecturerModal onCreate={handleCreateLecturer} />
       </Modal>
+      <Modal
+        opened={resetAssignedLecturersModal}
+        onClose={handleCloseModal}
+        title="Reset assigned lecturers?"
+      >
+        <ConfirmResetAssignedLecturersModal
+          onClear={handleResetLecturers}
+          closeModal={() => setResetAssignedLecturersModal(false)}
+        />
+      </Modal>
     </>
-  )
+  );
 }
