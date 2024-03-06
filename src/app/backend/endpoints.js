@@ -52,6 +52,7 @@ app.get("/lecturers", async (req, res) => {
     }
   );
 });
+
 /*
 Purpose: To get a single lecturer by their user_id, used in the admin page
 Parameters: NONE
@@ -223,6 +224,7 @@ app.get("/results", async (req, res) => {
     }
   });
 });
+
 /*
 Purpose: For getting all results of a student from a specific year (Typically the current year but can be open to historical look ups)
 Parameters: Registration number of the student and the year
@@ -243,6 +245,7 @@ app.post("/results/detailed", async (req, res) => {
     }
   );
 });
+
 /*
 Purpose: For getting all the results of the classes taught by a lecturer (I.e Lecturer viewing the results of their classes)
 Parameters: User_id of the lecturer
@@ -292,6 +295,7 @@ app.post("/results/create", async (req, res) => {
     }
   });
 });
+
 /*
 Purpose: For returning dynamically filtered results data for the analytics page
 Parameters: NONE
@@ -333,6 +337,7 @@ app.post("/results/queried", async (req, res) => {
     }
   });
 });
+
 /*
 Purpose: For bulk returning all results from a group of registration numbers
 Parameters: An array of registration numbers of students to get results from
@@ -368,6 +373,7 @@ app.get("/classes", async (req, res) => {
     return res.status(200).json(result);
   });
 });
+
 /*
 Purpose: To get a specific class by it's class code
 Parameters: Class code
@@ -386,6 +392,7 @@ app.get("/classes/code/:classCode", async (req, res) => {
     return res.json(result);
   });
 });
+
 /*
 Purpose: To get a specific class by it's lecturer/user assigned to it
 Parameters: User Id
@@ -407,6 +414,7 @@ app.get("/classes/user/:userId", async (req, res) => {
     }
   );
 });
+
 /*
 Purpose: To update a specific class by it's class code
 Parameters: Class name, credit level, credits, user_id(Lecturer) and the class code to specific the class to be updated
@@ -438,6 +446,7 @@ app.post("/classes/update", (req, res) => {
     }
   );
 });
+
 /*
 Purpose: To create a new class in the system
 Parameters: Class code, Class name, credit level, credits, locked state (Always 0) and the Lecturer (User_id of lecturer)
@@ -464,6 +473,7 @@ app.post("/classes/create", (req, res) => {
     }
   );
 });
+
 /*
 Purpose: To change the locked status of a class 
 Parameters: The classcode of the class to be locked and the new locked state (Either 0 or 1)
@@ -484,6 +494,7 @@ app.post("/classes/locked", (req, res) => {
     }
   });
 });
+
 /*
 Purpose: To reset every lecturer assigned to every class (I.e new academic year and new lecturers of each class)
 Parameters: NONE

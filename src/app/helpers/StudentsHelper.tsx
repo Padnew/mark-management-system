@@ -16,13 +16,14 @@ async function getStudentMarks(regNumbers: String[]): Promise<Result[]> {
   }
   return res.json();
 }
-
+//Purpose: To format and download any given list of students with their acommpanied marks
 export async function exportStudentsToCSV(
   students: Student[],
   csvName: String
 ) {
   const regNumbers = students.map((student) => student.reg_number);
   const studentMarks = await getStudentMarks(regNumbers);
+  //Gets each unique class code using a set
   const classes = Array.from(
     new Set(studentMarks.map((mark) => mark.class_code))
   );
@@ -42,10 +43,14 @@ export async function exportStudentsToCSV(
         );
         return mark ? mark.mark : "N/A";
       })
+      //Join is important for seperating each class mark with a value and comma
       .join(", ");
 
+    //Combines the student info with their marks for each class
     csvBody += studentRow + ", " + marksString + "\n";
   });
+  //Standard webapp practice for downloading a file for a user
+  //Creating a blob of the data, attaching it to an a tag, clicking it then cleaning up the remaining link and URL
   const blob = new Blob([csvBody], { type: "text/csv" });
 
   const url = URL.createObjectURL(blob);
