@@ -132,16 +132,6 @@ export default function Page() {
         <>
           <Group py={10} pl={5} align="flex-end">
             <Button
-              leftSection={<FaTv />}
-              variant="outline"
-              color="blue"
-              size="md"
-              onClick={() => {}}
-              disabled={!validLecturer}
-            >
-              View filtered group
-            </Button>
-            <Button
               leftSection={<FaFileExport />}
               variant="outline"
               color="green"
