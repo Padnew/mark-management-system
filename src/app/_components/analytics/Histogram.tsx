@@ -1,6 +1,6 @@
 import { MakeHistogram } from "@/app/helpers/StatisticsHelper";
 import { Result } from "@/app/types";
-import { BarChart } from "@mantine/charts";
+import { Bar, BarChart, Tooltip, XAxis } from "recharts";
 import React from "react";
 
 interface Props {
@@ -10,14 +10,11 @@ interface Props {
 function Histogram({ results }: Props) {
   const data = MakeHistogram(results);
   return (
-    <BarChart
-      w={650}
-      h={450}
-      data={data}
-      dataKey="label"
-      series={[{ name: "value", color: "#002b5c", label: "No. Students" }]}
-      tooltipProps={{ cursor: { fill: "none" } }}
-    />
+    <BarChart data={data} height={400} width={650}>
+      <XAxis dataKey="label" />
+      <Tooltip />
+      <Bar dataKey="value" fill="#002b5c" name="No. Students" />
+    </BarChart>
   );
 }
 

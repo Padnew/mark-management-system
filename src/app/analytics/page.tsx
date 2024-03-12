@@ -24,6 +24,8 @@ import {
   GetHistoricalAverages,
 } from "../helpers/StatisticsHelper";
 import { AreaChart, BarChart } from "@mantine/charts";
+import { Bar, Cell } from "recharts";
+import StudentComparisonBarChart from "../_components/analytics/StudentComparisonBarChart";
 
 async function getAllClasses(
   user_id: number,
@@ -277,15 +279,25 @@ export default function Page() {
                 size="md"
                 data={
                   studentResults
-                    ? studentResults?.map((result) => ({
-                        value: result.reg_number,
-                        label: result.reg_number,
-                      }))
+                    ? Array.from(
+                        new Set(
+                          studentResults.map((result) => result.reg_number)
+                        )
+                      ).map((reg_number) => {
+                        return {
+                          value: reg_number,
+                          label: reg_number,
+                        };
+                      })
                     : []
                 }
                 value={selectedStudent}
                 onChange={(value) => setSelectedStudent(value!)}
-                disabled={!validLecturer || selectedClass == "All"}
+                disabled={
+                  !validLecturer ||
+                  selectedClass == "All" ||
+                  selectedYear == "All"
+                }
               />
             </Stack>
           </Grid.Col>
@@ -328,6 +340,7 @@ export default function Page() {
                       />
                     </Stack>
                   )}
+
                   {selectedYear != "All" && selectedClass == "All" && (
                     <>
                       <Stack>
@@ -358,20 +371,9 @@ export default function Page() {
                       <Title order={4}>
                         Student marks for {selectedClass} in {selectedYear}
                       </Title>
-                      <BarChart
-                        w={650}
-                        h={450}
-                        data={studentResults.sort((a, b) =>
-                          a.mark > b.mark ? 1 : 0
-                        )}
-                        dataKey="reg_number"
-                        series={[
-                          { name: "mark", color: "#002b5c", label: "Result" },
-                        ]}
-                        tooltipProps={{
-                          cursor: { fill: "none" },
-                        }}
-                        withXAxis={false}
+                      <StudentComparisonBarChart
+                        selectedStudent={selectedStudent}
+                        students={studentResults}
                       />
                     </Stack>
                   )}
