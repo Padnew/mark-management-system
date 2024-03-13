@@ -231,10 +231,12 @@ Parameters: The year requested as well as the class codes
 */
 app.post("/results/classes", async (req, res) => {
   const { classes, year } = req.body;
+  //Exact same concept of results/regnumbers where dynamic placeholders are generated
   const placeholders = classes.map(() => "?").join(",");
+  //Placeholders are inserted into the query
   const query = `SELECT * FROM results WHERE class_code IN (${placeholders}) and Year = ?`;
 
-  // classes must be spread here to insert them seperate
+  // classes must be spread here to insert them seperately into each placeholder opposed to all in one (...classes)
   connection.query(query, [...classes, year], (err, result) => {
     if (err) {
       console.error(err);
