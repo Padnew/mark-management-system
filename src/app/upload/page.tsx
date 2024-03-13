@@ -10,7 +10,7 @@ import { Center, Stack, Title } from "@mantine/core";
 async function getData(userId: number, role: number): Promise<ClassType[]> {
   const res =
     role == 2
-      ? await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes/user/:userId`)
+      ? await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes/user/${userId}`)
       : await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes`);
   if (!res.ok) {
     throw new Error("Failed to fetch data");
