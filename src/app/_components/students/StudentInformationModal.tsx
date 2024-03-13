@@ -1,4 +1,5 @@
 "use client";
+import { CalculateClassAverages } from "@/app/helpers/StatisticsHelper";
 import { Result, Student } from "@/app/types";
 import {
   Center,
@@ -14,12 +15,13 @@ import {
 } from "@mantine/core";
 import React, { useEffect, useState } from "react";
 import { FaBook } from "react-icons/fa";
+import { PiArrowDownRight, PiArrowUpRight } from "react-icons/pi";
 
 interface props {
   student: Student;
 }
 
-const fetchStudentMarks = async (student: Student) => {
+async function fetchStudentMarks(student: Student) {
   const regNumber = student.reg_number;
   const year = new Date().getFullYear().toString();
   const res = await fetch(
@@ -34,16 +36,36 @@ const fetchStudentMarks = async (student: Student) => {
     throw new Error("Failed to fetch classes");
   }
   return res.json();
-};
+}
+
+async function fetchClassResults(classes: string[]) {
+  const year = new Date().getFullYear().toString();
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/results/classes`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ classes, year }),
+    }
+  );
+  if (!res.ok) {
+    throw new Error("Failed to fetch classes");
+  }
+  return res.json();
+}
 
 export default function StudentInformationModal({ student }: props) {
   const [studentResults, setStudentResults] = useState<Result[] | undefined>(
     []
   );
+  const [classResults, setClassResults] = useState<Result[] | undefined>([]);
   useEffect(() => {
     const fetchData = async () => {
-      const results = await fetchStudentMarks(student);
+      const results: Result[] = await fetchStudentMarks(student);
+      const classCodes: string[] = results.map((result) => result.class_code);
+      const classResults = await fetchClassResults(classCodes);
       setStudentResults(results);
+      setClassResults(classResults);
     };
     fetchData();
   }, [student]);
@@ -68,6 +90,8 @@ export default function StudentInformationModal({ student }: props) {
   const numberOfClassesSubmitted = studentResults?.map(
     (result) => result.year === "2024"
   ).length;
+
+  const averageMarkByClass = CalculateClassAverages(classResults || []);
   return (
     <>
       <Title order={2} mb="md">
@@ -76,10 +100,10 @@ export default function StudentInformationModal({ student }: props) {
       <Grid>
         <Grid.Col span={7}>
           <Paper withBorder radius="md" ta="center">
-            <Group>
+            <Group justify="center">
               <Stack gap={0} pl="md">
                 <Text c="dimmed" size="md">
-                  Class Average
+                  Student Class Average
                 </Text>
                 <Text size="xl">{averageAcrossClasses}%</Text>
               </Stack>
@@ -118,18 +142,43 @@ export default function StudentInformationModal({ student }: props) {
         </Grid.Col>
       </Grid>
       <SimpleGrid cols={3} mt={10}>
-        {studentResults?.map((result) =>
-          result.year == "2024" ? (
-            <Paper key={result.class_code} withBorder radius="md" ta={"center"}>
-              <Stack gap={0}>
-                <Text c="dimmed" size="md">
-                  {result.class_code}
-                </Text>
-                <Text size="xl">{result.mark}%</Text>
-              </Stack>
-            </Paper>
-          ) : null
-        )}
+        {studentResults?.map((result) => {
+          if (result.year === "2024") {
+            const classAverage = averageMarkByClass.find(
+              (classMark) => classMark.classKey === result.class_code
+            )?.average;
+
+            return (
+              <Paper
+                key={result.class_code}
+                withBorder
+                radius="md"
+                ta={"center"}
+              >
+                <Stack gap={0} ta="center">
+                  <Text size="md">{result.class_code}</Text>
+                  <Group gap={0} justify="center">
+                    <Text
+                      size="xl"
+                      c={(classAverage ?? 0) > result.mark ? "red" : "green"}
+                    >
+                      {result.mark}%
+                    </Text>
+                    {(classAverage ?? 0) > result.mark ? (
+                      <PiArrowDownRight color="red" />
+                    ) : (
+                      <PiArrowUpRight color="green" />
+                    )}
+                  </Group>
+                  <Text size="sm" c="dimmed">
+                    Cohort Average: {classAverage ?? "Not Found"}%
+                  </Text>
+                </Stack>
+              </Paper>
+            );
+          }
+          return null;
+        })}
       </SimpleGrid>
     </>
   );

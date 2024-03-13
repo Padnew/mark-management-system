@@ -210,6 +210,7 @@ export default function Page() {
         opened={openStudentModal}
         onClose={() => setOpenStudentModal(false)}
         title="Student information"
+        size="lg"
       >
         <StudentInformationModal student={selectedStudent!} />
       </Modal>
