@@ -142,7 +142,7 @@ Parameters: user_id of lecturer
 app.get("/students/user/:userId", async (req, res) => {
   const { userId } = req.params;
   connection.query(
-    "SELECT s.* FROM students s JOIN results r ON s.reg_number = r.reg_number JOIN classes c ON r.class_code = c.class_code WHERE c.user_id = ?",
+    "SELECT DISTINCT s.* FROM students s JOIN results r ON s.reg_number = r.reg_number JOIN classes c ON r.class_code = c.class_code WHERE c.user_id = ? AND year = 2024",
     [userId],
     (err, result) => {
       if (err) {
@@ -218,6 +218,28 @@ app.get("/results", async (req, res) => {
     if (err) {
       return res.status(500).json({ error: "Internal Server Error" });
     } else if (res.length == 0) {
+      return res.status(404).json({ error: "No results found" });
+    } else {
+      return res.json(result);
+    }
+  });
+});
+
+/*
+Purpose: For getting all results for a year based on a set of classes
+Parameters: The year requested as well as the class codes
+*/
+app.post("/results/classes", async (req, res) => {
+  const { classes, year } = req.body;
+  const placeholders = classes.map(() => "?").join(",");
+  const query = `SELECT * FROM results WHERE class_code IN (${placeholders}) and Year = ?`;
+
+  // classes must be spread here to insert them seperate
+  connection.query(query, [...classes, year], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    } else if (result.length == 0) {
       return res.status(404).json({ error: "No results found" });
     } else {
       return res.json(result);
