@@ -37,7 +37,7 @@ export default function Navbar() {
         onClose={close}
         title="Switch Accounts"
         zIndex={1000}
-        size="auto"
+        size="sm"
       >
         <LogInModal />
       </Modal>

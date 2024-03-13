@@ -1,47 +1,68 @@
 import React, { useContext, useState } from "react";
-import { Button, Group, TextInput, Stack, PasswordInput } from "@mantine/core";
-import UserContext from '@/app/context/UserContext';
+import {
+  Button,
+  Group,
+  TextInput,
+  Stack,
+  PasswordInput,
+  Text,
+  Title,
+} from "@mantine/core";
+import UserContext from "@/app/context/UserContext";
 
 const LogInModal: React.FC = () => {
-    const userContext = useContext(UserContext);
-    const [username, setUsername] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
+  const userContext = useContext(UserContext);
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [loginError, setLoginError] = useState<string>("");
 
-    const handleSubmit = async () => {
-        if (userContext) {
-            await userContext.login(username, password);
-        }
-    };
+  const handleSubmit = async () => {
+    if (userContext) {
+      const success = await userContext.login(username, password);
+      if (!success) {
+        setLoginError("Login failed. Please check your email and password.");
+      } else {
+        setLoginError("");
+        setUsername("");
+        setPassword("");
+      }
+    }
+  };
 
-    return (
-        <>
-            {userContext?.user ? (
-                <Group justify="space-between">
-                    <Button size="lg" onClick={userContext.logout}>
-                        Log me out
-                    </Button>
-                </Group>
-            ) : (
-                <Stack>
-                    <TextInput
-                        label="Email"
-                        placeholder="lecturer@uni.ac.uk"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
-                    <PasswordInput
-                        label="Password"
-                        placeholder="Enter your password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <Button type="submit" onClick={handleSubmit}>
-                        Submit
-                    </Button>
-                </Stack>
-            )}
-        </>
-    );
-}
+  return (
+    <>
+      {userContext?.user ? (
+        <Group justify="center">
+          <Title order={3} ta="center">
+            Currently logged in as {userContext.user.first_name}{" "}
+            {userContext.user.last_name}
+          </Title>
+          <Button size="lg" onClick={userContext.logout}>
+            Log me out
+          </Button>
+        </Group>
+      ) : (
+        <Stack>
+          <TextInput
+            label="Email"
+            placeholder="lecturer@uni.ac.uk"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <PasswordInput
+            label="Password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {loginError && <Text c="red">{loginError}</Text>}
+          <Button type="submit" onClick={handleSubmit}>
+            Submit
+          </Button>
+        </Stack>
+      )}
+    </>
+  );
+};
 
 export default LogInModal;
