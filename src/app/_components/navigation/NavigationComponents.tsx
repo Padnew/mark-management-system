@@ -28,7 +28,11 @@ export function NavbarLink({
 }: NavbarLinkProps) {
   return (
     <Tooltip label={label} position="right">
-      <div onClick={onClick} style={{ marginBottom: "4rem" }}>
+      <div
+        onClick={onClick}
+        style={{ marginBottom: "4rem" }}
+        data-cy={`nav-button-${label.toLowerCase()}`}
+      >
         <Icon size={40} />
       </div>
     </Tooltip>

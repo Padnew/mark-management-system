@@ -146,7 +146,7 @@ export default function Page() {
         </>
       )}
       {validLecturer ? (
-        <Table stickyHeader>
+        <Table stickyHeader data-cy="students-table">
           <Table.Thead bg="transparent">
             <Table.Tr>
               <Table.Th>

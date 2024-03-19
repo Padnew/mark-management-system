@@ -26,6 +26,7 @@ export default function Home() {
         icon={<FaInfo />}
         mt="xl"
         fz="lg"
+        data-cy="dashboard-page-quote"
       >
         <Title order={2}>Welcome to your new Mark Management System!</Title>
         Here you will be able to view a plethora of student information, upload

@@ -20,12 +20,13 @@ interface Props {
 
 function DropzoneComponent({ classes, user }: Props) {
   const [uploadStatus, setUploadStatus] = useState(false);
-  const [validationError, setValidationError] = useState("");
+  const [uploadError, setUploadError] = useState(false);
   const [selectedYear, setSelectedYear] = useState("");
   const openRef = useRef<() => void>(null);
 
   const handleFileUpload = (files: File[]) => {
     setUploadStatus(false);
+    setUploadError(false);
     const file = files[0];
     Papa.parse<CSVRow>(file, {
       header: true,
@@ -63,8 +64,10 @@ function DropzoneComponent({ classes, user }: Props) {
             `${process.env.NEXT_PUBLIC_API_URL}/results/create`
           );
           console.log("Data submitted successfully.");
+          setUploadStatus(true);
         } catch (error) {
           console.error("Error submitting data:", error);
+          setUploadError(true);
         }
       },
       error: (error) => console.error("Error parsing CSV:", error.message),
@@ -94,7 +97,7 @@ function DropzoneComponent({ classes, user }: Props) {
   };
 
   return (
-    <Container size={800}>
+    <Container size={800} data-cy="upload-dropzone">
       <Select
         data={
           Array.isArray(classes)
@@ -145,7 +148,6 @@ function DropzoneComponent({ classes, user }: Props) {
             </Text>
           </div>
         </Dropzone>
-        {validationError && <Text c="red">{validationError}</Text>}
         <Button
           onClick={() => openRef.current?.()}
           size="md"

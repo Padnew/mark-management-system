@@ -32,7 +32,7 @@ const LogInModal: React.FC = () => {
   return (
     <>
       {userContext?.user ? (
-        <Group justify="center">
+        <Group justify="center" data-cy="logged-in-modal">
           <Title order={3} ta="center">
             Currently logged in as {userContext.user.first_name}{" "}
             {userContext.user.last_name}
@@ -42,21 +42,27 @@ const LogInModal: React.FC = () => {
           </Button>
         </Group>
       ) : (
-        <Stack>
+        <Stack data-cy="logged-out-modal">
           <TextInput
             label="Email"
             placeholder="lecturer@uni.ac.uk"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            data-cy="login-username-field"
           />
           <PasswordInput
             label="Password"
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            data-cy="login-password-field"
           />
           {loginError && <Text c="red">{loginError}</Text>}
-          <Button type="submit" onClick={handleSubmit}>
+          <Button
+            type="submit"
+            onClick={handleSubmit}
+            data-cy="login-submit-button"
+          >
             Submit
           </Button>
         </Stack>

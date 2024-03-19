@@ -140,7 +140,7 @@ export default function Page() {
         heading={"Admin"}
         subHeading={"Manage Lecturers and Classes"}
       />
-      <Group py={10} pl={5} align="flex-end">
+      <Group py={10} pl={5} align="flex-end" data-cy="admin-control-section">
         <Button
           leftSection={<FaPlus />}
           variant="outline"
