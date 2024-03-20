@@ -21,10 +21,12 @@ import { useRouter } from "next/navigation";
 import Histogram from "../_components/analytics/Histogram";
 import {
   CalculateClassAverages,
+  GetAverageMark,
   GetHistoricalAverages,
+  GetMedianMark,
+  GetModeOfMarks,
 } from "../helpers/StatisticsHelper";
 import { AreaChart, BarChart } from "@mantine/charts";
-import { Bar, Cell } from "recharts";
 import StudentComparisonBarChart from "../_components/analytics/StudentComparisonBarChart";
 
 async function getAllClasses(
@@ -116,6 +118,7 @@ export default function Page() {
       if (response.status == 404) {
       } else {
         const data = await response.json();
+        GetModeOfMarks(data);
         setStudentResults(data);
       }
     } catch (error) {
@@ -139,10 +142,6 @@ export default function Page() {
     year: result.year,
   }));
 
-  const singleYearAverage =
-    data.length > 0
-      ? data.reduce((total, next) => total + next.result, 0) / data.length
-      : 0;
   const courseSelectData = [
     { value: "Computer Science", label: "Computer Science" },
     {
@@ -173,7 +172,7 @@ export default function Page() {
         zIndex={1000}
         overlayProps={{ radius: "sm", blur: 2 }}
       />
-      <Paper px={5} bg="transparent" pl="lg">
+      <Paper px={5} bg="transparent" pl="lg" data-cy="analytics-filters">
         <Grid ml={5}>
           <Grid.Col span={5}>
             <Select
@@ -206,6 +205,7 @@ export default function Page() {
               value={selectedCourse}
               onChange={(value) => setSelectedCourse(value!)}
               disabled={!validLecturer}
+              data-cy="selected-course-dropdown"
             />
           </Grid.Col>
           <Grid.Col span={2}>
@@ -218,6 +218,7 @@ export default function Page() {
                 fullWidth
                 mx="lg"
                 disabled={!validLecturer}
+                data-cy="generate-graphs-button"
               >
                 Generate Graphs
               </Button>
@@ -264,6 +265,7 @@ export default function Page() {
                 fullWidth
                 mx="lg"
                 disabled={!validLecturer}
+                data-cy="clear-filters-button"
               >
                 Clear Filters
               </Button>
@@ -301,103 +303,128 @@ export default function Page() {
               />
             </Stack>
           </Grid.Col>
+          <Grid.Col span={5} ta="center">
+            <Paper withBorder mt={15}>
+              {validLecturer && studentResults && studentResults?.length > 0 ? (
+                <SimpleGrid cols={3}>
+                  <Stack gap={0}>
+                    <Text c="dimmed" size="md">
+                      Mean
+                    </Text>
+                    {`${GetAverageMark(studentResults)}%`}
+                  </Stack>
+
+                  <Stack gap={0}>
+                    <Text c="dimmed" size="md">
+                      Mode
+                    </Text>
+                    {GetModeOfMarks(studentResults).length === 1
+                      ? GetModeOfMarks(studentResults)
+                      : GetModeOfMarks(studentResults).join(", ")}
+                  </Stack>
+                  <Stack gap={0}>
+                    <Text c="dimmed" size="md">
+                      Median
+                    </Text>
+                    {GetMedianMark(studentResults)}
+                  </Stack>
+                </SimpleGrid>
+              ) : (
+                "No statistics to show"
+              )}
+            </Paper>
+          </Grid.Col>
         </Grid>
       </Paper>
-      <Center>
-        {validLecturer ? (
-          <>
-            {studentResults && studentResults?.length == 0 && (
-              <Title order={2} c="red">
-                No results for those parameters
-              </Title>
-            )}
-            {studentResults && studentResults?.length > 0 && (
-              <Stack ta="center">
-                <Text>{`Results used in data: ${studentResults?.length}`}</Text>
-                <SimpleGrid cols={2}>
-                  <Group>
-                    <Stack>
-                      <Title order={4}>Outcomes of students</Title>
-                      <Histogram results={studentResults} />
-                    </Stack>
-                  </Group>
-                  {selectedYear == "All" && (
-                    <Stack>
-                      <Title order={4}>Average across each year</Title>
-                      <AreaChart
-                        w={650}
-                        h={450}
-                        curveType="linear"
-                        data={GetHistoricalAverages(studentResults)}
-                        series={[
-                          {
-                            name: "value",
-                            color: "#002b5c",
-                            label: "Average %",
-                          },
-                        ]}
-                        dataKey={"label"}
-                      />
-                    </Stack>
-                  )}
-
-                  {selectedYear != "All" && selectedClass == "All" && (
-                    <>
-                      <Stack>
-                        <Title order={4}>
-                          Average across each class for {selectedYear}
-                        </Title>
-                        <BarChart
-                          w={650}
-                          h={450}
-                          data={CalculateClassAverages(studentResults)}
-                          tooltipProps={{
-                            cursor: { fill: "none" },
-                          }}
-                          series={[
-                            {
-                              name: "average",
-                              color: "#002b5c",
-                              label: "Average %",
-                            },
-                          ]}
-                          dataKey={"classKey"}
-                        />
-                      </Stack>
-                    </>
-                  )}
-                  {selectedYear != "All" && selectedClass != "All" && (
-                    <Stack>
-                      <Title order={4}>
-                        Student marks for {selectedClass} in {selectedYear}
-                      </Title>
-                      <StudentComparisonBarChart
-                        selectedStudent={selectedStudent}
-                        students={studentResults}
-                      />
-                    </Stack>
-                  )}
-                </SimpleGrid>
-              </Stack>
-            )}
-          </>
-        ) : (
-          <Stack align="center">
-            <Title order={2} c="red">
-              You must upload marks before viewing analytics
+      {validLecturer ? (
+        <>
+          {studentResults && studentResults?.length == 0 && (
+            <Title order={2} c="red" ta="center">
+              No results for those parameters
             </Title>
-            <Button
-              onClick={() => router.push("/upload")}
-              w="fit-content"
-              size="xl"
-              variant="outline"
-              color="red"
-            >
-              Upload Marks
-            </Button>
-          </Stack>
-        )}
-      </Center>
+          )}
+          {studentResults && studentResults?.length > 0 && (
+            <Stack ta="center">
+              <Text>{`Results used in data: ${studentResults?.length}`}</Text>
+              <SimpleGrid cols={2} p={0} m={0}>
+                <Stack>
+                  <Title order={4}>Outcomes of students</Title>
+                  <Histogram results={studentResults} />
+                </Stack>
+                {selectedYear == "All" && (
+                  <Stack>
+                    <Title order={4}>Average across each year</Title>
+                    <AreaChart
+                      w={650}
+                      h={450}
+                      curveType="linear"
+                      data={GetHistoricalAverages(studentResults)}
+                      series={[
+                        {
+                          name: "value",
+                          color: "#002b5c",
+                          label: "Average %",
+                        },
+                      ]}
+                      dataKey={"label"}
+                    />
+                  </Stack>
+                )}
+
+                {selectedYear != "All" && selectedClass == "All" && (
+                  <Stack>
+                    <Title order={4}>
+                      Average across each class for {selectedYear}
+                    </Title>
+                    <BarChart
+                      w={650}
+                      h={450}
+                      data={CalculateClassAverages(studentResults)}
+                      tooltipProps={{
+                        cursor: { fill: "none" },
+                      }}
+                      series={[
+                        {
+                          name: "average",
+                          color: "#002b5c",
+                          label: "Average %",
+                        },
+                      ]}
+                      dataKey={"classKey"}
+                    />
+                  </Stack>
+                )}
+                {selectedYear != "All" && selectedClass != "All" && (
+                  <Stack>
+                    <Title order={4}>
+                      Student marks for {selectedClass} in {selectedYear}
+                    </Title>
+                    <StudentComparisonBarChart
+                      selectedStudent={selectedStudent}
+                      students={studentResults}
+                    />
+                  </Stack>
+                )}
+              </SimpleGrid>
+            </Stack>
+          )}
+        </>
+      ) : (
+        <Stack align="center">
+          <Title order={2} c="red">
+            You must upload marks before viewing analytics
+          </Title>
+          <Button
+            onClick={() => router.push("/upload")}
+            w="fit-content"
+            size="xl"
+            variant="outline"
+            color="red"
+          >
+            Upload Marks
+          </Button>
+        </Stack>
+      )}
     </>
   );
 }
