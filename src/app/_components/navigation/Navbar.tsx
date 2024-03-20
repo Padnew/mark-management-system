@@ -66,17 +66,17 @@ export default function Navbar() {
           {user?.role == 1 && (
             <NavbarLink
               icon={FaCogs}
-              label="Admin area"
+              label="Admin"
               onClick={() => router.push("/admin")}
             />
           )}
         </Flex>
         {user == null ? (
-          <NavbarLink icon={MdExitToApp} label="Log In" bottom onClick={open} />
+          <NavbarLink icon={MdExitToApp} label="log-in" bottom onClick={open} />
         ) : (
           <NavbarLink
             icon={MdExitToApp}
-            label="Log Out"
+            label="log-out"
             bottom
             onClick={open}
           />

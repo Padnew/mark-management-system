@@ -18,7 +18,7 @@ export default function ExportStudentToCSVModal({ students }: Props) {
     exportStudentsToCSV(students, csvName);
   }
   return (
-    <Stack>
+    <Stack data-cy="export-student-csv-modal">
       <TextInput
         label="Name of CSV:"
         value={csvName}

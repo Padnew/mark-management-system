@@ -138,6 +138,7 @@ export default function Page() {
               size="md"
               onClick={() => setOpenExportModal(true)}
               disabled={!validLecturer}
+              data-cy="export-students-button"
             >
               Export filtered group
             </Button>
@@ -165,6 +166,7 @@ export default function Page() {
                   value={filters.name}
                   onChange={handleFilterChange}
                   placeholder="Name"
+                  data-cy="student-name-filter"
                 />
               </Table.Th>
               <Table.Th>
