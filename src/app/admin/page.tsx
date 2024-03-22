@@ -37,8 +37,7 @@ export default function Page() {
   const router = useRouter();
 
   if (
-    userContext &&
-    !userContext.isLoadingUser &&
+    (!userContext?.isLoadingUser && !userContext?.user) ||
     userContext.user?.role == 2
   ) {
     router.push("/404");
