@@ -19,6 +19,7 @@ function Page() {
           size="xl"
           w="fit-content"
           variant="outline"
+          data-cy="return-home-button"
         >
           Return home
         </Button>

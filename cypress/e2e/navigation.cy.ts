@@ -80,3 +80,30 @@ describe('Lecturer can visit all pages', () => {
     cy.get('[data-cy=not-found-page]').should('be.visible');
   });
 });
+
+
+describe('Non logged in user cannot visit any pages', () => {
+  
+  it('can\'t access students', () => {
+    cy.clearAllLocalStorage();
+    cy.visit('http://localhost:3000/students');
+    cy.get('[data-cy=not-found-page]').should('be.visible');
+    cy.get('[data-cy=return-home-button]').click({force: true});
+  });
+  it('can\'t access analytics', () => {
+    cy.visit('http://localhost:3000/analytics');
+    cy.get('[data-cy=not-found-page]').should('be.visible');
+    cy.get('[data-cy=return-home-button]').click({force: true});
+  });
+  it('can\'t access upload', () => {
+    cy.visit('http://localhost:3000/upload');
+    cy.get('[data-cy=not-found-page]').should('be.visible');
+    cy.get('[data-cy=return-home-button]').click({force: true});
+  });
+  
+  it('can\'t access admin', () => {
+    cy.visit('http://localhost:3000/admin');
+    cy.get('[data-cy=not-found-page]').should('be.visible');
+    cy.get('[data-cy=return-home-button]').click({force: true});
+  });
+});
