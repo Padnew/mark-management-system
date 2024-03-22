@@ -151,6 +151,5 @@ export function GetAverageMark(results: Result[]) {
 export function GetMedianMark(results: Result[]){
   const middeMark = Math.floor(results.length / 2), marks = [...results].sort((a, b) => a.mark - b.mark);
   const median: number = results.length % 2 !== 0 ? marks[middeMark].mark : (results[middeMark - 1].mark + results[middeMark].mark) / 2;
-  console.log(median)
   return median;
 }

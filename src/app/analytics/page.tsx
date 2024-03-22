@@ -334,6 +334,11 @@ export default function Page() {
               )}
             </Paper>
           </Grid.Col>
+          <Grid.Col span={2} ta="center">
+            <Text c="red">
+              Ensure to click generate after filters are changed
+            </Text>
+          </Grid.Col>
         </Grid>
       </Paper>
       {validLecturer ? (
