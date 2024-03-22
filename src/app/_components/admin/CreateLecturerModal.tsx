@@ -1,6 +1,6 @@
 import { isValidUser } from "@/app/helpers/UserHelper";
 import { User } from "@/app/types";
-import { Button, Stack, TextInput } from "@mantine/core";
+import { Button, Stack, TextInput, Text } from "@mantine/core";
 import React, { useState } from "react";
 
 interface Props {
@@ -11,8 +11,10 @@ function CreateLecturerModal({ onCreate }: Props) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [errorCreatingLecturer, setErrorCreatingLecturer] = useState(false);
 
   async function createLecturer() {
+    setErrorCreatingLecturer(false);
     const newLecturer: User = {
       user_id: 0,
       first_name: firstName,
@@ -39,11 +41,13 @@ function CreateLecturerModal({ onCreate }: Props) {
       if (response.ok) {
         onCreate();
       }
+    } else {
+      setErrorCreatingLecturer(true);
     }
   }
 
   return (
-    <Stack>
+    <Stack data-cy="create-lecturer-modal">
       <TextInput
         placeholder="John"
         type="text"
@@ -51,6 +55,7 @@ function CreateLecturerModal({ onCreate }: Props) {
         onChange={(e) => setFirstName(e.target.value)}
         label="First name:"
         minLength={2}
+        data-cy="lecturer-first-textbox"
       />
       <TextInput
         placeholder="Smith"
@@ -59,6 +64,7 @@ function CreateLecturerModal({ onCreate }: Props) {
         onChange={(e) => setLastName(e.target.value)}
         label="Last Name:"
         minLength={2}
+        data-cy="lecturer-last-textbox"
       />
       <TextInput
         placeholder="john@strath.ac.uk"
@@ -66,10 +72,21 @@ function CreateLecturerModal({ onCreate }: Props) {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         label="Email:"
+        data-cy="lecturer-email-textbox"
       />
-      <Button color="green" onClick={createLecturer} mt={5}>
+      <Button
+        color="green"
+        onClick={createLecturer}
+        mt={5}
+        data-cy="create-lecturer-button"
+      >
         Create Lecturer
       </Button>
+      {errorCreatingLecturer && (
+        <Text data-cy="error-creating-lecturer" c="red">
+          Error creating new lecturer please check details
+        </Text>
+      )}
     </Stack>
   );
 }

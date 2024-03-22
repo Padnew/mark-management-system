@@ -52,6 +52,69 @@ describe('Admin can use analytic page functionality', () => {
     });
     });
 
+    describe('Admin can use upload page functionality', () => {
+        it('should navigate to upload', () => {
+            cy.get('[data-cy=nav-button-upload]').click({force: true});
+            cy.get('[data-cy=upload-dropzone]').should('be.visible');
+        });
+        it('should be able to search for course', () => {
+            cy.get('[data-cy=select-class-dropdown]').should('be.visible');
+            cy.get('[data-cy=select-class-dropdown]').click({force: true});
+        });
+        it('should be able to search for year', () => {
+            cy.get('[data-cy=select-year-dropdown]').should('be.visible');
+            cy.get('[data-cy=select-year-dropdown]').click({force: true});
+        });
+        });
+
+        describe('Admin can use admin page functionality', () => {
+            it('should navigate to admin', () => {
+                cy.get('[data-cy=nav-button-admin]').click({force: true});
+                cy.get('[data-cy=nav-button-admin]').click({force: true});
+                cy.get('[data-cy=admin-control-section]').should('be.visible');
+            });
+            it('should be able reset lecturers (opens modal)', () => {
+                cy.get('[data-cy=reset-assigned-lecturers-button]').click({force: true});
+                cy.get('[data-cy=confirm-reset-lecturers-modal]').should('be.visible');
+                cy.get('[data-cy=cancel-reset-lecturers-button]').click({force: true});
+            });
+            it('should be able clear excess students (opens modal)', () => {
+                cy.get('[data-cy=clear-excess-students-button]').click({force: true});
+                cy.get('[data-cy=confirm-clear-students-modal]').should('be.visible');
+                cy.get('[data-cy=cancel-clear-students-button]').click({force: true});
+            });
+            it('should be able create class', () => {
+                cy.get('[data-cy=create-class-modal-button]').click({force: true});
+                cy.get('[data-cy=create-class-modal]').should('be.visible');
+                cy.get('[data-cy=class-code-textbox]').type('TD404');
+                cy.get('[data-cy=class-name-textbox]').type('Test class');
+                cy.get('[data-cy=class-credits-textbox]').type('20');
+                cy.get('[data-cy=class-credit-level-textbox]').type('3');
+                cy.get('[data-cy=create-class-button]').should('be.visible');
+                cy.get('body').click(0, 0);
+            });
+            it('should be able create a lecturer', () => {
+                cy.get('[data-cy=create-lecturer-modal-button]').click({force: true});
+                cy.get('[data-cy=create-lecturer-modal]').should('be.visible');
+                cy.get('[data-cy=lecturer-first-textbox]').type('Barry');
+                cy.get('[data-cy=lecturer-last-textbox]').type('Scott');
+                cy.get('[data-cy=lecturer-email-textbox]').type('Barry@strath.ac.uk');
+                cy.get('[data-cy=create-lecturer-button]').should('be.visible');
+                cy.get('body').click(0, 0);
+            });
+            it('should throw error creating an invalid lecturer', () => {
+                cy.get('[data-cy=create-lecturer-modal-button]').click({force: true});
+                cy.get('[data-cy=create-lecturer-modal]').should('be.visible');
+                cy.get('[data-cy=lecturer-first-textbox]').type('B');
+                cy.get('[data-cy=lecturer-last-textbox]').type('S');
+                cy.get('[data-cy=lecturer-email-textbox]').type('Bazza@yoohoo.ru');
+                cy.get('[data-cy=create-lecturer-button]').click({force: true});
+                cy.get('[data-cy=error-creating-lecturer]').should('be.visible');
+                cy.get('body').click(0, 0);
+            });
+            });
+
+
 describe('Lecturer can use student page functionality', () => {
     it('should log in as lecturer', () => {
       cy.clearAllLocalStorage();
@@ -99,3 +162,14 @@ describe('Lecturer can use analytic page functionality', () => {
         cy.get('[data-cy=generate-graphs-button]').click();
     });
     });
+
+    describe('Lecturer can use upload page functionality', () => {
+        it('should navigate to upload', () => {
+            cy.get('[data-cy=nav-button-upload]').click({force: true});
+            cy.get('[data-cy=upload-dropzone]').should('be.visible');
+        });
+        it('should be able to search for course', () => {
+            cy.get('[data-cy=select-class-dropdown]').should('be.visible');
+            cy.get('[data-cy=select-class-dropdown]').click({force: true});
+        });
+        });

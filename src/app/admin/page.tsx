@@ -20,6 +20,7 @@ import CreateLecturerModal from "../_components/admin/CreateLecturerModal";
 import UserContext from "../context/UserContext";
 import { useRouter } from "next/navigation";
 import ConfirmResetAssignedLecturersModal from "../_components/admin/ConfirmResetAssignedLecturersModal";
+import ClearExcessStudentsModal from "../_components/admin/ClearExcessStudentsModal";
 
 export default function Page() {
   const [classes, setClasses] = useState<ClassType[] | undefined>([]);
@@ -30,6 +31,7 @@ export default function Page() {
   const [lecturerModalOpened, setLecturerModalOpened] = useState(false);
   const [resetAssignedLecturersModal, setResetAssignedLecturersModal] =
     useState(false);
+  const [clearStudentsModal, setClearStudentsModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassType | null>(null);
   const userContext = useContext(UserContext);
   const router = useRouter();
@@ -40,15 +42,6 @@ export default function Page() {
     userContext.user?.role == 2
   ) {
     router.push("/404");
-  }
-
-  async function clearExcessStudents() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/students/clear`
-    );
-    if (!res.ok) {
-      throw new Error("Failed to clear excess students");
-    }
   }
 
   async function fetchClasses() {
@@ -147,6 +140,7 @@ export default function Page() {
           color="green"
           size="md"
           onClick={() => setCreateModalOpened(true)}
+          data-cy="create-class-modal-button"
         >
           Add new class
         </Button>
@@ -156,6 +150,7 @@ export default function Page() {
           color="green"
           size="md"
           onClick={() => setLecturerModalOpened(true)}
+          data-cy="create-lecturer-modal-button"
         >
           Add new lecturer
         </Button>
@@ -164,7 +159,8 @@ export default function Page() {
           variant="outline"
           color="red"
           size="md"
-          onClick={clearExcessStudents}
+          onClick={() => setClearStudentsModal(true)}
+          data-cy="clear-excess-students-button"
         >
           Clear excess students
         </Button>
@@ -174,6 +170,7 @@ export default function Page() {
           color="red"
           size="md"
           onClick={() => setResetAssignedLecturersModal(true)}
+          data-cy="reset-assigned-lecturers-button"
         >
           Unassigned all Lecturers
         </Button>
@@ -253,6 +250,15 @@ export default function Page() {
         <ConfirmResetAssignedLecturersModal
           onClear={handleResetLecturers}
           closeModal={() => setResetAssignedLecturersModal(false)}
+        />
+      </Modal>
+      <Modal
+        opened={clearStudentsModal}
+        onClose={handleCloseModal}
+        title="Clear excess students"
+      >
+        <ClearExcessStudentsModal
+          closeModal={() => setClearStudentsModal(false)}
         />
       </Modal>
     </>

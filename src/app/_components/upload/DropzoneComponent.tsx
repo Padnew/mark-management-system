@@ -108,12 +108,14 @@ function DropzoneComponent({ classes, user }: Props) {
             : []
         }
         label="Please select a class from your taught classes"
+        data-cy="select-class-dropdown"
       />
       {user.role == 1 && (
         <Select
           data={["2020", "2021", "2022", "2023", "2024"]}
           label="Please select a year to upload for:"
           onChange={(value) => setSelectedYear(value!)}
+          data-cy="select-year-dropdown"
         />
       )}
       <Container

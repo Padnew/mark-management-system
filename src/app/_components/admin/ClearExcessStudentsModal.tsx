@@ -3,36 +3,33 @@ import React from "react";
 import { FaCheckCircle, FaThumbsUp, FaTimesCircle } from "react-icons/fa";
 
 interface Props {
-  onClear: () => void;
   closeModal: () => void;
 }
 
-export default function ConfirmResetAssignedLecturersModal({
-  onClear,
-  closeModal,
-}: Props) {
-  async function confirmResetAssignedLecturers() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes/reset`);
+export default function ClearExcessStudents({ closeModal }: Props) {
+  async function clearExcessStudents() {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/students/clear`
+    );
     if (!res.ok) {
-      throw new Error("Failed to reset assigned lecturers");
-    } else {
-      onClear();
+      throw new Error("Failed to clear excess students");
     }
   }
   return (
-    <Stack ta="center" data-cy="confirm-reset-lecturers-modal">
+    <Stack ta="center" data-cy="confirm-clear-students-modal">
       <Title order={3}>
-        Are you sure you want to reset all assigned lecturers?
+        Are you sure you want to clear excess students in the system?
       </Title>
       <Title order={4}>
-        This should ONLY be done at the end of an academic year
+        This will REMOVE any students who do not have any marks in the system
       </Title>
       <Group ta="center" grow>
         <Button
           leftSection={<FaCheckCircle />}
           color="green"
-          onClick={confirmResetAssignedLecturers}
+          onClick={clearExcessStudents}
           size="lg"
+          data-cy="confirm-clear-students-button"
         >
           Confirm
         </Button>
@@ -41,7 +38,7 @@ export default function ConfirmResetAssignedLecturersModal({
           size="lg"
           onClick={closeModal}
           leftSection={<FaTimesCircle />}
-          data-cy="cancel-reset-lecturers-button"
+          data-cy="cancel-clear-students-button"
         >
           Cancel
         </Button>

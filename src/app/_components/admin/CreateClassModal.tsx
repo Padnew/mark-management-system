@@ -45,13 +45,14 @@ function CreateClassModal({ lecturers, onCreate }: Props) {
   }
 
   return (
-    <Stack>
+    <Stack data-cy="create-class-modal">
       <TextInput
         placeholder="PH161"
         type="text"
         value={classCode}
         onChange={(e) => setClassCode(e.target.value)}
         label="Class Code:"
+        data-cy="class-code-textbox"
       />
       <TextInput
         placeholder="Universe and Everything"
@@ -59,6 +60,7 @@ function CreateClassModal({ lecturers, onCreate }: Props) {
         value={className}
         onChange={(e) => setClassName(e.target.value)}
         label="Class Name:"
+        data-cy="class-name-textbox"
       />
       <TextInput
         placeholder="20"
@@ -69,6 +71,7 @@ function CreateClassModal({ lecturers, onCreate }: Props) {
           setCredits(newValue === "" ? 0 : Number(newValue));
         }}
         label="Credits:"
+        data-cy="class-credits-textbox"
       />
       <TextInput
         placeholder="2"
@@ -79,6 +82,7 @@ function CreateClassModal({ lecturers, onCreate }: Props) {
           setCreditLevel(newValue === "" ? 0 : Number(newValue));
         }}
         label="Credit Level:"
+        data-cy="class-credit-level-textbox"
       />
       <Select
         placeholder="No Lecturer chosen"
@@ -90,7 +94,12 @@ function CreateClassModal({ lecturers, onCreate }: Props) {
           label: `${lecturer.first_name} ${lecturer.last_name}`,
         }))}
       />
-      <Button color="green" onClick={createClass} mt={5}>
+      <Button
+        color="green"
+        onClick={createClass}
+        mt={5}
+        data-cy="create-class-button"
+      >
         Create Class
       </Button>
     </Stack>
