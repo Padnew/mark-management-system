@@ -416,7 +416,7 @@ export default function Page() {
         </>
       ) : (
         <Stack align="center">
-          <Title order={2} c="red">
+          <Title order={2} c="red" data-cy="lecturer-no-marks-notice">
             You must upload marks before viewing analytics
           </Title>
           <Button

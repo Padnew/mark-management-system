@@ -194,7 +194,7 @@ export default function Page() {
         </Table>
       ) : (
         <Stack align="center">
-          <Title order={2} c="red">
+          <Title order={2} c="red" data-cy='no-marks-uploaded'>
             You must upload marks before viewing student insights
           </Title>
           <Button
@@ -203,6 +203,7 @@ export default function Page() {
             size="xl"
             variant="outline"
             color="red"
+            data-cy='redirect-to-upload-button'
           >
             Upload Marks
           </Button>

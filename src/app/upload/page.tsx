@@ -49,7 +49,7 @@ export default function Page() {
       ) : (
         <Center ta="center">
           <Stack>
-            <Title order={1} c="red">
+            <Title order={1} c="red" data-cy='upload-no-classes-assigned'>
               You have no classes assigned to you
             </Title>
             <Title order={3} c="red">
