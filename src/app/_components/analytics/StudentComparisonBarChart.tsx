@@ -1,6 +1,6 @@
 import { Result } from "@/app/types";
 import React from "react";
-import { BarChart, Bar, YAxis, Tooltip, Cell } from "recharts";
+import { BarChart, Bar, YAxis, Tooltip, Cell, XAxis } from "recharts";
 
 interface Props {
   selectedStudent: string;
@@ -11,6 +11,7 @@ function StudentComparisonBarChart({ selectedStudent, students }: Props) {
   return (
     <BarChart width={650} height={450} data={students}>
       <YAxis />
+      <XAxis dataKey="null" label="Students" />
       <Tooltip />
       <Bar dataKey="mark" name="Mark" fill="#8884d8">
         {students.map((entry) => (

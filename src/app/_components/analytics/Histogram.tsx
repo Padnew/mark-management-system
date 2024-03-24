@@ -10,7 +10,7 @@ interface Props {
 function Histogram({ results }: Props) {
   const data = MakeHistogram(results);
   return (
-    <BarChart data={data} height={400} width={650}>
+    <BarChart data={data} height={450} width={675}>
       <XAxis dataKey="label" />
       <Tooltip />
       <Bar dataKey="value" fill="#002b5c" name="No. Students" />

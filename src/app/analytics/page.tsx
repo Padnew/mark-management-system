@@ -351,7 +351,7 @@ export default function Page() {
           {studentResults && studentResults?.length > 0 && (
             <Stack ta="center">
               <Text>{`Results used in data: ${studentResults?.length}`}</Text>
-              <SimpleGrid cols={2} p={0} m={0}>
+              <Group justify="center">
                 <Stack>
                   <Title order={4}>Outcomes of students</Title>
                   <Histogram results={studentResults} />
@@ -410,7 +410,7 @@ export default function Page() {
                     />
                   </Stack>
                 )}
-              </SimpleGrid>
+              </Group>
             </Stack>
           )}
         </>
