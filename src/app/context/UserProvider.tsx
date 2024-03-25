@@ -6,10 +6,13 @@ interface UserProviderProps {
   children: ReactNode;
 }
 
+//Implements the user context and defines all functionality
+// Influenced by: https://stackoverflow.com/questions/74298603/how-to-better-type-a-react-context-to-assume-that-the-value-will-always-be-defin
 const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<any>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   useEffect(() => {
+    //Check if a user is already logged in
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -17,7 +20,9 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     setIsLoadingUser(false);
   }, []);
 
+  //Defines the login functionality
   const login = async (email: string, password: string) => {
+    //Hit the endpoint to use the local strategy in passport.js
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -37,9 +42,12 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const logout = () => {
     setUser(null);
+    //Remove from local storage for safety
     localStorage.removeItem("user");
   };
 
+  // Works to provide user information from the context to all child elements in layout.tsx
+  // Sourced from: https://legacy.reactjs.org/docs/context.html
   return (
     <UserContext.Provider value={{ user, login, logout, isLoadingUser }}>
       {children}
