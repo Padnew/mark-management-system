@@ -47,7 +47,7 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   };
 
   // Works to provide user information from the context to all child elements in layout.tsx
-  // Sourced from: https://legacy.reactjs.org/docs/context.html
+  // Influenced from: https://legacy.reactjs.org/docs/context.html
   return (
     <UserContext.Provider value={{ user, login, logout, isLoadingUser }}>
       {children}

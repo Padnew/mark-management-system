@@ -323,18 +323,19 @@ app.post("/results/create", async (req, res) => {
 /*
 Purpose: For returning dynamically filtered results data for the analytics page
 Parameters: NONE
-Side note: This one endpoint and logic took me roughly 3, 6 hour days to get working as I refused to handle the request in the front end nor create 25 endpoints for each filter combination
 */
 app.post("/results/queried", async (req, res) => {
   const { class: classFilter, course, degreeLevel, year } = req.body;
+  //If there are no filters then this will just be executed and return all results
   let query = `
     SELECT results.result_id, results.class_code, results.reg_number, results.mark, results.unique_code, results.year, students.degree_name, students.degree_level
     FROM results
     INNER JOIN students ON results.reg_number = students.reg_number
   `;
-  //To avoid using 5^2 endpoints it can be reduced to this single endpoint by just dynamically building the query depending on the parameters taht are passed into the body of the request
+  //To avoid using 5^2 endpoints it can be reduced to this single endpoint by just dynamically building the query depending on the parameters that are passed into the bdoy of the request
   const params = [];
-  //This approach allows any combination of filters to be put onto request. This is the benefit of using raw SQL over ORMs is that it can be as simple as a string builder
+  //This approach allows any combination of filters to be put onto request. A benefit of using raw SQL over ORMs is that it can be as simple as a string builder
+  //If any filter exists in the body of the request it concatenates it into the array of parameters
   if (classFilter) {
     params.push(`results.class_code = '${classFilter}'`);
   }
